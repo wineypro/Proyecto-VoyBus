@@ -2,8 +2,11 @@ const path = require('path');
 const { Umzug, SequelizeStorage } = require('umzug');
 const sequelize = require('../config/database');
 
+// El glob exige "/" como separador, también en Windows
+const migrationsGlob = path.join(__dirname, 'migrations', '*.js').replace(/\\/g, '/');
+
 const umzug = new Umzug({
-  migrations: { glob: path.join(__dirname, 'migrations', '*.js') },
+  migrations: { glob: migrationsGlob },
   context: sequelize.getQueryInterface(),
   storage: new SequelizeStorage({ sequelize }),
   logger: console,
@@ -11,6 +14,13 @@ const umzug = new Umzug({
 
 async function main() {
   const command = process.argv[2];
+
+  // Si no hay ninguna migración (ni pendiente ni ejecutada), algo está mal con la ruta
+  const total = (await umzug.pending()).length + (await umzug.executed()).length;
+  if (total === 0) {
+    throw new Error(`No se encontraron migraciones en: ${migrationsGlob}`);
+  }
+
   if (command === 'up') {
     await umzug.up();
   } else if (command === 'down') {
