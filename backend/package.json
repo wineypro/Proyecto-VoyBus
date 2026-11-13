@@ -1,11 +1,14 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "API de VoyBus",
+  "main": "src/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1", 
-    "start":"node index.js"
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "db:migrate": "node src/database/migrate.js up",
+    "db:seed": "node src/database/seed.js",
+    "db:reset": "node src/database/migrate.js reset && node src/database/seed.js"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +18,9 @@
     "cors": "^2.8.6",
     "dotenv": "^18.0.5",
     "express": "^5.2.1",
-    "sqlite3": "^6.0.1"
+    "sequelize": "^6.37.8",
+    "sqlite3": "^6.0.1",
+    "umzug": "^3.8.3",
+    "zod": "^4.6.7"
   }
 }
