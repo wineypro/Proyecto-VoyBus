@@ -1,7 +1,9 @@
 const { Router } = require('express');
 const controller = require('../controllers/auth.controller');
+const preferences = require('../controllers/preferences.controller');
 const validate = require('../middlewares/validate');
 const { requireAuth } = require('../middlewares/auth');
+const { updatePreferencesBody } = require('../validators/preferences.validators');
 const {
   registerBody,
   loginBody,
@@ -24,5 +26,9 @@ router.post('/login', validate(loginBody, 'body'), controller.login);
 router.get('/me', requireAuth, controller.me);
 router.post('/logout', requireAuth, controller.logout);
 router.post('/change-password', requireAuth, validate(changePasswordBody, 'body'), controller.changePassword);
+
+// Preferencias de la cuenta (ACC-06)
+router.get('/preferences', requireAuth, preferences.get);
+router.patch('/preferences', requireAuth, validate(updatePreferencesBody, 'body'), preferences.update);
 
 module.exports = router;
