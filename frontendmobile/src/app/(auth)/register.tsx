@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -14,7 +14,8 @@ import {
 } from 'react-native';
 
 import { describeError, register } from '@/api/auth';
-import { colors } from '@/constants/colors';
+import { useTheme } from '@/theme/ThemeContext';
+import type { Palette } from '@/theme/ThemeContext';
 import { t } from '@/i18n';
 
 // Mismas reglas que el backend: 8 a 15 caracteres con minúscula, mayúscula, número y símbolo.
@@ -24,6 +25,8 @@ const passwordIsValid = (p: string) =>
 const emailIsValid = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 
 export default function RegisterScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -149,7 +152,8 @@ export default function RegisterScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.background },
   container: { flexGrow: 1, justifyContent: 'center', padding: 24 },
   title: { fontSize: 26, fontWeight: '700', color: colors.text },

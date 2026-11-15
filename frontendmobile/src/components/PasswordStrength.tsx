@@ -1,6 +1,8 @@
+import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors } from '@/constants/colors';
+import { useTheme } from '@/theme/ThemeContext';
+import type { Palette } from '@/theme/ThemeContext';
 import { t } from '@/i18n';
 
 // Cuenta cuántos requisitos cumple la contraseña (los mismos que valida el backend).
@@ -18,6 +20,8 @@ export const passwordIsValid = (p: string) => checks(p).every((c) => c.ok);
 
 // Recomendaciones para una contraseña segura + indicador de fortaleza.
 export function PasswordStrength({ password }: { password: string }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const list = checks(password);
   const score = list.filter((c) => c.ok).length;
   const level = score <= 2 ? 0 : score <= 4 ? 1 : 2;
@@ -46,7 +50,8 @@ export function PasswordStrength({ password }: { password: string }) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
   box: { marginTop: 8 },
   bar: { height: 6, borderRadius: 3, backgroundColor: colors.secondary, overflow: 'hidden' },
   fill: { height: 6 },

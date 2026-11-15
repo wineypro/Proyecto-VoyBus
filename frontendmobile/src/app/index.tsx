@@ -2,10 +2,11 @@ import { Redirect } from 'expo-router';
 import { ActivityIndicator, View } from 'react-native';
 
 import { useAuth } from '@/auth/AuthContext';
-import { colors } from '@/constants/colors';
+import { useTheme } from '@/theme/ThemeContext';
 
 // Pantalla inicial: con sesión va a la cuenta; sin sesión, al inicio de sesión.
 export default function Index() {
+  const { colors } = useTheme();
   const { user, loading } = useAuth();
 
   if (loading) {
