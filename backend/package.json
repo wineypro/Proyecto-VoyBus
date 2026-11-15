@@ -19,6 +19,7 @@
     "dotenv": "^18.0.5",
     "express": "^5.2.1",
     "nodemailer": "^10.5.0",
+    "qrcode": "^1.5.4",
     "sequelize": "^6.37.8",
     "sqlite3": "^6.0.1",
     "umzug": "^3.8.3",

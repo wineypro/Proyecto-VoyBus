@@ -39,8 +39,13 @@ export default function LoginScreen() {
     setNeedsVerification(false);
     setSubmitting(true);
     try {
-      await signIn(email.trim(), password);
-      router.replace('/account');
+      const result = await signIn(email.trim(), password);
+      if (result.status === 'two-factor') {
+        // La contraseña es correcta, pero falta el código de la app autenticadora.
+        router.push({ pathname: '/two-factor', params: { challenge: result.challengeToken } });
+      } else {
+        router.replace('/account');
+      }
     } catch (e) {
       setNeedsVerification(e instanceof ApiError && e.code === 'ACCOUNT_NOT_VERIFIED');
       setError(describeError(e));

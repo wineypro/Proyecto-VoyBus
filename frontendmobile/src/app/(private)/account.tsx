@@ -44,6 +44,10 @@ export default function AccountScreen() {
         <Text style={styles.secondaryText}>{t.auth.preferencesButton}</Text>
       </Pressable>
 
+      <Pressable style={styles.secondary} onPress={() => router.push('/security')}>
+        <Text style={styles.secondaryText}>{t.twofa.securityButton}</Text>
+      </Pressable>
+
       <Pressable style={styles.secondary} onPress={() => router.push('/change-password')}>
         <Text style={styles.secondaryText}>{t.auth.changePasswordButton}</Text>
       </Pressable>

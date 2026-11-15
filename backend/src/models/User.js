@@ -16,6 +16,9 @@ const User = sequelize.define('User', {
   photoUrl: { type: DataTypes.STRING(255), allowNull: true },
   pendingEmail: { type: DataTypes.STRING(120), allowNull: true },
   preferences: { type: DataTypes.JSON, allowNull: true },
+  twoFactorEnabled: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+  twoFactorSecret: { type: DataTypes.TEXT, allowNull: true },
+  twoFactorLastStep: { type: DataTypes.INTEGER, allowNull: true },
 });
 
 module.exports = User;

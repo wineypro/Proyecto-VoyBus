@@ -6,6 +6,7 @@ const AppError = require('../utils/AppError');
 const { hashPassword, verifyPassword } = require('../utils/password');
 const { sendMail, codeEmail } = require('../utils/mailer');
 const { issueCode, consumeCode, CODE_MINUTES } = require('./code.service');
+const { createChallenge } = require('../utils/challenge');
 
 const MAX_FAILED_ATTEMPTS = 5; // intentos fallidos seguidos antes de bloquear
 const LOCK_MINUTES = 5; // espera temporal tras el bloqueo
@@ -22,6 +23,7 @@ function toPublicUser(user, roleName) {
     status: user.status,
     alias: user.alias ?? null,
     photoUrl: user.photoUrl ?? null,
+    twoFactorEnabled: Boolean(user.twoFactorEnabled),
     createdAt: user.createdAt,
   };
 }
@@ -163,15 +165,32 @@ async function login({ email, password }) {
     );
   }
 
-  // Aquí se agregará la verificación en dos pasos (ACC-02) cuando la cuenta la tenga activada.
+  // Con verificación en dos pasos activa, la contraseña sola no da acceso: se entrega un desafío de
+  // vida corta y la app debe enviar el código de su app autenticadora (/auth/login/2fa).
+  // Los contadores de intentos NO se reinician aquí, sino al completar el segundo paso.
+  if (user.twoFactorEnabled) {
+    return { requiresTwoFactor: true, challengeToken: createChallenge(user.id) };
+  }
 
   await user.update({ failedLoginAttempts: 0, lockedUntil: null });
+  return createSession(user, user.role.name);
+}
 
+// Abre la sesión: el token viaja a la app y en la base solo queda su hash.
+async function createSession(user, roleName) {
   const token = crypto.randomBytes(32).toString('hex');
   const expiresAt = new Date(Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000);
   await Session.create({ userId: user.id, tokenHash: sha256(token), expiresAt });
 
-  return { token, expiresAt, user: toPublicUser(user, user.role.name) };
+  return { token, expiresAt, user: toPublicUser(user, roleName) };
 }
 
-module.exports = { register, verifyEmail, resendVerification, login, toPublicUser, sha256 };
+module.exports = {
+  register,
+  verifyEmail,
+  resendVerification,
+  login,
+  createSession,
+  toPublicUser,
+  sha256,
+};
