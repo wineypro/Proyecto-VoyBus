@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -12,13 +12,16 @@ import {
 } from 'react-native';
 
 import { describeError, resendCode, verifyEmail } from '@/api/auth';
-import { colors } from '@/constants/colors';
+import { useTheme } from '@/theme/ThemeContext';
+import type { Palette } from '@/theme/ThemeContext';
 import { t } from '@/i18n';
 
 // Segundos de espera entre un envío y otro (el backend también lo exige).
 const RESEND_SECONDS = 30;
 
 export default function VerifyScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const router = useRouter();
   const { email: emailParam } = useLocalSearchParams<{ email?: string }>();
   const email = (emailParam ?? '').toString();
@@ -102,7 +105,7 @@ export default function VerifyScreen() {
 
         <Pressable style={[styles.button, submitting && styles.buttonDisabled]} onPress={onVerify} disabled={submitting}>
           {submitting ? (
-            <ActivityIndicator color={colors.white} />
+            <ActivityIndicator color={colors.onPrimary} />
           ) : (
             <Text style={styles.buttonText}>{t.auth.verifyButton}</Text>
           )}
@@ -122,7 +125,8 @@ export default function VerifyScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.background },
   container: { flexGrow: 1, justifyContent: 'center', padding: 24 },
   title: { fontSize: 26, fontWeight: '700', color: colors.text },
@@ -142,7 +146,7 @@ const styles = StyleSheet.create({
   info: { marginTop: 12, color: colors.primary },
   button: { marginTop: 20, backgroundColor: colors.primary, borderRadius: 8, padding: 14, alignItems: 'center' },
   buttonDisabled: { opacity: 0.6 },
-  buttonText: { color: colors.white, fontWeight: '700' },
+  buttonText: { color: colors.onPrimary, fontWeight: '700' },
   footer: { marginTop: 20, alignItems: 'center' },
   link: { color: colors.primary, fontWeight: '600' },
   linkDisabled: { opacity: 0.5 },

@@ -40,6 +40,22 @@ export const verifyEmail = (email: string, code: string) =>
 export const resendCode = (email: string) =>
   request<{ sent: boolean }>('/auth/resend-code', { method: 'POST', body: { email } });
 
+export const forgotPassword = (email: string) =>
+  request<{ sent: boolean }>('/auth/forgot-password', { method: 'POST', body: { email } });
+
+export const resetPassword = (input: {
+  email: string;
+  code: string;
+  newPassword: string;
+  confirmPassword: string;
+}) => request<{ updated: boolean }>('/auth/reset-password', { method: 'POST', body: input });
+
+export const changePassword = (input: {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}) => request<{ updated: boolean }>('/auth/change-password', { method: 'POST', body: input });
+
 // Convierte cualquier error en un texto para mostrar en pantalla. Si el backend devolvió
 // errores de validación por campo, se muestran todos los mensajes.
 export function describeError(e: unknown): string {

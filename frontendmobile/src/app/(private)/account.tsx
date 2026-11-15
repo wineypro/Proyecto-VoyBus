@@ -1,11 +1,15 @@
+import { useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useAuth } from '@/auth/AuthContext';
-import { colors } from '@/constants/colors';
+import { useTheme } from '@/theme/ThemeContext';
+import type { Palette } from '@/theme/ThemeContext';
 import { t } from '@/i18n';
 
 export default function AccountScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const router = useRouter();
   const { user, signOut } = useAuth();
 
@@ -36,6 +40,14 @@ export default function AccountScreen() {
         <Text style={styles.buttonText}>{t.auth.goToLines}</Text>
       </Pressable>
 
+      <Pressable style={styles.secondary} onPress={() => router.push('/preferences')}>
+        <Text style={styles.secondaryText}>{t.auth.preferencesButton}</Text>
+      </Pressable>
+
+      <Pressable style={styles.secondary} onPress={() => router.push('/change-password')}>
+        <Text style={styles.secondaryText}>{t.auth.changePasswordButton}</Text>
+      </Pressable>
+
       <Pressable style={styles.logout} onPress={confirmLogout}>
         <Text style={styles.logoutText}>{t.auth.logoutButton}</Text>
       </Pressable>
@@ -43,13 +55,23 @@ export default function AccountScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
   container: { flex: 1, padding: 24, justifyContent: 'center', backgroundColor: colors.background },
   title: { fontSize: 26, fontWeight: '700', color: colors.text, marginBottom: 12 },
   text: { fontSize: 18, color: colors.text },
   muted: { marginTop: 4, color: colors.text, opacity: 0.7 },
   button: { marginTop: 28, backgroundColor: colors.primary, borderRadius: 8, padding: 14, alignItems: 'center' },
-  buttonText: { color: colors.white, fontWeight: '700' },
+  buttonText: { color: colors.onPrimary, fontWeight: '700' },
+  secondary: {
+    marginTop: 14,
+    borderColor: colors.primary,
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 14,
+    alignItems: 'center',
+  },
+  secondaryText: { color: colors.primary, fontWeight: '700' },
   logout: {
     marginTop: 14,
     borderColor: colors.error,
