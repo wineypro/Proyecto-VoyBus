@@ -88,6 +88,10 @@ export default function LoginScreen() {
           </Pressable>
         ) : null}
 
+        <Pressable style={styles.forgot} onPress={() => router.push('/forgot-password')}>
+          <Text style={styles.link}>{t.auth.forgotPassword}</Text>
+        </Pressable>
+
         <Pressable style={[styles.button, submitting && styles.buttonDisabled]} onPress={onSubmit} disabled={submitting}>
           {submitting ? (
             <ActivityIndicator color={colors.white} />
@@ -138,5 +142,6 @@ const styles = StyleSheet.create({
   buttonText: { color: colors.white, fontWeight: '700' },
   guest: { marginTop: 20, alignItems: 'center' },
   verifyLink: { marginTop: 8 },
+  forgot: { marginTop: 12, alignItems: 'flex-end' },
   link: { color: colors.primary, fontWeight: '600' },
 });

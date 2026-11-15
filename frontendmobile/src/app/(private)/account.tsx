@@ -36,6 +36,10 @@ export default function AccountScreen() {
         <Text style={styles.buttonText}>{t.auth.goToLines}</Text>
       </Pressable>
 
+      <Pressable style={styles.secondary} onPress={() => router.push('/change-password')}>
+        <Text style={styles.secondaryText}>{t.auth.changePasswordButton}</Text>
+      </Pressable>
+
       <Pressable style={styles.logout} onPress={confirmLogout}>
         <Text style={styles.logoutText}>{t.auth.logoutButton}</Text>
       </Pressable>
@@ -50,6 +54,15 @@ const styles = StyleSheet.create({
   muted: { marginTop: 4, color: colors.text, opacity: 0.7 },
   button: { marginTop: 28, backgroundColor: colors.primary, borderRadius: 8, padding: 14, alignItems: 'center' },
   buttonText: { color: colors.white, fontWeight: '700' },
+  secondary: {
+    marginTop: 14,
+    borderColor: colors.primary,
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 14,
+    alignItems: 'center',
+  },
+  secondaryText: { color: colors.primary, fontWeight: '700' },
   logout: {
     marginTop: 14,
     borderColor: colors.error,
