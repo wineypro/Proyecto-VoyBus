@@ -1,4 +1,3 @@
-import * as SecureStore from 'expo-secure-store';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
@@ -6,7 +5,7 @@ import * as authApi from '@/api/auth';
 import type { User } from '@/api/auth';
 import { ApiError, setSessionToken } from '@/api/client';
 
-const TOKEN_KEY = 'voybus_session_token';
+import { clearToken, loadToken, saveToken } from './tokenStorage';
 
 type AuthState = {
   user: User | null;
@@ -27,7 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     (async () => {
       try {
-        const saved = await SecureStore.getItemAsync(TOKEN_KEY);
+        const saved = await loadToken();
         if (saved) {
           setSessionToken(saved);
           try {
@@ -36,7 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setSessionToken(null);
             // Token vencido o revocado: se borra. Si solo falló la conexión, se conserva.
             if (e instanceof ApiError && e.status !== 0) {
-              await SecureStore.deleteItemAsync(TOKEN_KEY);
+              await clearToken();
             }
           }
         }
@@ -51,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signIn = useCallback(async (email: string, password: string) => {
     const result = await authApi.login(email, password);
     setSessionToken(result.token);
-    await SecureStore.setItemAsync(TOKEN_KEY, result.token);
+    await saveToken(result.token);
     setUser(result.user);
   }, []);
 
@@ -62,7 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Aunque el servidor no responda, la sesión se cierra en este teléfono.
     }
     setSessionToken(null);
-    await SecureStore.deleteItemAsync(TOKEN_KEY).catch(() => {});
+    await clearToken();
     setUser(null);
   }, []);
 
