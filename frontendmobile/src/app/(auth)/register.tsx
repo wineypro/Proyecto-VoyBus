@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 
 import { describeError, register } from '@/api/auth';
+import { setRegistrationDraft } from '@/auth/registrationDraft';
 import { useTheme } from '@/theme/ThemeContext';
 import type { Palette } from '@/theme/ThemeContext';
 import { t } from '@/i18n';
@@ -62,6 +63,7 @@ export default function RegisterScreen() {
         confirmPassword,
         acceptPrivacy: true,
       });
+      setRegistrationDraft(email.trim().toLowerCase(), password);
       router.replace({ pathname: '/verify', params: { email: email.trim().toLowerCase() } });
     } catch (e) {
       setError(describeError(e));
