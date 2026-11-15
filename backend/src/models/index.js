@@ -10,6 +10,7 @@ const User = require('./User');
 const Session = require('./Session');
 const FavoriteLine = require('./FavoriteLine');
 const FavoriteStop = require('./FavoriteStop');
+const OneTimeCode = require('./OneTimeCode');
 
 Line.hasMany(LineRoute, { foreignKey: 'lineId', as: 'routes' });
 LineRoute.belongsTo(Line, { foreignKey: 'lineId', as: 'line' });
@@ -34,6 +35,9 @@ User.hasMany(FavoriteStop, { foreignKey: 'userId', as: 'favoriteStops' });
 FavoriteStop.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 FavoriteStop.belongsTo(Stop, { foreignKey: 'stopId', as: 'stop' });
 
+User.hasMany(OneTimeCode, { foreignKey: 'userId', as: 'codes' });
+OneTimeCode.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
 module.exports = {
   sequelize,
   Role,
@@ -45,4 +49,5 @@ module.exports = {
   Session,
   FavoriteLine,
   FavoriteStop,
+  OneTimeCode,
 };

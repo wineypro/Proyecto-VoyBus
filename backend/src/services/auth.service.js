@@ -4,6 +4,8 @@ const { Op } = require('sequelize');
 const { User, Role, Session } = require('../models');
 const AppError = require('../utils/AppError');
 const { hashPassword, verifyPassword } = require('../utils/password');
+const { sendMail, codeEmail } = require('../utils/mailer');
+const { issueCode, consumeCode, CODE_MINUTES } = require('./code.service');
 
 const MAX_FAILED_ATTEMPTS = 5; // intentos fallidos seguidos antes de bloquear
 const LOCK_MINUTES = 5; // espera temporal tras el bloqueo
@@ -24,12 +26,29 @@ function toPublicUser(user, roleName) {
   };
 }
 
-// Verificación SIMULADA: no se envía un correo real. El código de 6 dígitos se calcula a partir
-// del correo, así que no hace falta guardarlo. En la respuesta del registro se devuelve para poder probar.
-function verificationCode(email) {
-  const secret = process.env.AUTH_SECRET || 'voybus-dev-secret';
-  const digest = crypto.createHmac('sha256', secret).update(email).digest();
-  return String(digest.readUInt32BE(0) % 1000000).padStart(6, '0');
+// Crea un código nuevo, lo envía por correo y arma lo que se informa a la app.
+// Si el correo está simulado (sin credenciales SMTP), se devuelve el código para poder probar;
+// con correo real, el código NUNCA se devuelve.
+async function sendVerificationCode(user) {
+  const code = await issueCode(user, 'verify_email');
+  const mail = codeEmail({
+    title: 'Tu código de verificación de VoyBus',
+    intro: `Hola ${user.name}, usa este código para verificar tu correo en VoyBus.`,
+    code,
+    minutes: CODE_MINUTES,
+  });
+  const result = await sendMail({
+    to: user.email,
+    subject: 'Tu código de verificación de VoyBus',
+    ...mail,
+  });
+  return {
+    channel: 'email',
+    simulated: result.simulated,
+    sent: result.sent,
+    expiresInMinutes: CODE_MINUTES,
+    ...(result.simulated ? { code } : {}),
+  };
 }
 
 const sha256 = (value) => crypto.createHash('sha256').update(value).digest('hex');
@@ -58,28 +77,35 @@ async function register({ name, email, phone, password, acceptPrivacy }) {
 
   return {
     user: toPublicUser(user, role.name),
-    verification: { simulated: true, channel: 'email', code: verificationCode(email) },
+    verification: await sendVerificationCode(user),
   };
 }
 
-// Marca el correo como verificado si el código coincide. El error es el mismo para
-// "correo inexistente" y "código incorrecto", para no revelar qué cuentas existen.
+// Marca el correo como verificado si el código es correcto, vigente y no usado.
+// El error es el mismo para "correo inexistente" y "código incorrecto", para no revelar qué cuentas existen.
 async function verifyEmail({ email, code }) {
   const user = await User.findOne({ where: { email }, include: [{ model: Role, as: 'role' }] });
-  const expected = Buffer.from(verificationCode(email));
-  const received = Buffer.from(code);
-  const valid =
-    user && expected.length === received.length && crypto.timingSafeEqual(expected, received);
-  if (!valid) {
-    throw new AppError(400, 'INVALID_CODE', 'El código no es válido');
+  if (!user) {
+    throw new AppError(400, 'INVALID_CODE', 'El código no es válido o ya venció');
   }
   if (user.status === 'disabled') {
     throw new AppError(403, 'ACCOUNT_DISABLED', 'Esta cuenta está deshabilitada');
   }
+  await consumeCode(user, 'verify_email', code);
   if (user.status === 'pending') {
     await user.update({ status: 'active', emailVerifiedAt: new Date() });
   }
   return toPublicUser(user, user.role.name);
+}
+
+// Reenvía el código de verificación. Responde igual exista o no la cuenta, para no revelarlo.
+async function resendVerification({ email }) {
+  const user = await User.findOne({ where: { email } });
+  if (!user || user.status !== 'pending') {
+    return { sent: true };
+  }
+  const verification = await sendVerificationCode(user);
+  return { sent: true, verification };
 }
 
 // Hash de relleno: se compara aunque el correo no exista, para que el tiempo de respuesta
@@ -148,4 +174,4 @@ async function login({ email, password }) {
   return { token, expiresAt, user: toPublicUser(user, user.role.name) };
 }
 
-module.exports = { register, verifyEmail, login, toPublicUser, verificationCode, sha256 };
+module.exports = { register, verifyEmail, resendVerification, login, toPublicUser, sha256 };

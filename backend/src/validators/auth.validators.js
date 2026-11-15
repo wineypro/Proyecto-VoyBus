@@ -45,4 +45,50 @@ const verifyEmailBody = z.object({
   code: z.string().trim().regex(/^[0-9]{6}$/, 'El código debe tener 6 dígitos'),
 });
 
-module.exports = { registerBody, loginBody, verifyEmailBody };
+// Recuperar contraseña (ACC-04): se pide el código al correo y luego se envía con la clave nueva.
+const forgotPasswordBody = z.object({
+  email: z.string().trim().toLowerCase().pipe(z.email('El correo no es válido')),
+});
+
+const resetPasswordBody = z
+  .object({
+    email: z.string().trim().toLowerCase().pipe(z.email('El correo no es válido')),
+    code: z.string().trim().regex(/^[0-9]{6}$/, 'El código debe tener 6 dígitos'),
+    newPassword: password,
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    path: ['confirmPassword'],
+    message: 'Las contraseñas no coinciden',
+  });
+
+// Cambiar contraseña estando dentro de la cuenta (ACC-04).
+const changePasswordBody = z
+  .object({
+    currentPassword: z.string().min(1, 'Ingresa tu contraseña actual'),
+    newPassword: password,
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    path: ['confirmPassword'],
+    message: 'Las contraseñas no coinciden',
+  })
+  .refine((data) => data.newPassword !== data.currentPassword, {
+    path: ['newPassword'],
+    message: 'La nueva contraseña debe ser distinta a la actual',
+  });
+
+// Reenvío del código de verificación.
+const resendCodeBody = z.object({
+  email: z.string().trim().toLowerCase().pipe(z.email('El correo no es válido')),
+});
+
+module.exports = {
+  registerBody,
+  loginBody,
+  verifyEmailBody,
+  resendCodeBody,
+  forgotPasswordBody,
+  resetPasswordBody,
+  changePasswordBody,
+};
