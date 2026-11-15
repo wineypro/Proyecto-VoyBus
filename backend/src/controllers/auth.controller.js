@@ -13,6 +13,11 @@ async function verifyEmail(req, res) {
   ok(res, user);
 }
 
+async function resendCode(req, res) {
+  const { verification } = await authService.resendVerification(req.valid.body);
+  ok(res, { sent: true }, { verification });
+}
+
 async function login(req, res) {
   const { token, expiresAt, user } = await authService.login(req.valid.body);
   ok(res, { token, user }, { expiresAt });
@@ -28,4 +33,4 @@ async function logout(req, res) {
   ok(res, { loggedOut: true });
 }
 
-module.exports = { register, verifyEmail, login, me, logout };
+module.exports = { register, verifyEmail, resendCode, login, me, logout };
