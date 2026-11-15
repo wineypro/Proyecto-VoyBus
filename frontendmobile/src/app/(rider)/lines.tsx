@@ -53,6 +53,16 @@ export default function LinesScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Barra de navegación entre Líneas y Paraderos */}
+      <View style={styles.navBar}>
+        <Pressable style={[styles.navTab, styles.navTabActive]}>
+          <Text style={[styles.navTabText, styles.navTabTextActive]}>{t.nav.lines}</Text>
+        </Pressable>
+        <Pressable style={styles.navTab} onPress={() => router.push('./stops')}>
+          <Text style={styles.navTabText}>{t.nav.stops}</Text>
+        </Pressable>
+      </View>
+
       <Text style={styles.title}>{t.lines.title}</Text>
 
       <TextInput
@@ -115,13 +125,39 @@ export default function LinesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, paddingTop: 60, backgroundColor: colors.background },
+  container: { flex: 1, padding: 20, paddingTop: 50, backgroundColor: colors.background },
   center: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 12,
     backgroundColor: colors.background,
+  },
+  navBar: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 16,
+  },
+  navTab: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 10,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.secondary,
+    alignItems: 'center',
+  },
+  navTabActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  navTabText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: colors.text,
+  },
+  navTabTextActive: {
+    color: colors.white,
   },
   title: { fontSize: 24, fontWeight: '700', color: colors.primary, marginBottom: 12 },
   searchInput: {

@@ -6,6 +6,10 @@ export const es = {
     error: 'Algo salió mal',
     back: '← Volver',
   },
+  nav: {
+    lines: 'Líneas',
+    stops: 'Paraderos',
+  },
   lines: {
     title: 'Líneas y recorridos',
     empty: 'No hay líneas disponibles',
@@ -22,5 +26,22 @@ export const es = {
     stopsTitle: 'Paraderos del recorrido (en orden)',
     noRoutes: 'Esta línea no tiene recorridos configurados',
     coordinatesLabel: 'Ubicación GPS:',
+    viewStopDetail: 'Ver paradero →',
+  },
+  stops: {
+    title: 'Paraderos de la red',
+    empty: 'No hay paraderos disponibles',
+    searchPlaceholder: 'Buscar paradero por nombre o código (ej. P01)...',
+    noSearchResults: 'No se encontraron paraderos con esa búsqueda',
+    mapTitle: 'Mapa de paraderos',
+    mapHint: 'Toca cualquier paradero en el mapa para seleccionarlo o abrir su detalle',
+    linesPassingLabel: 'Líneas que pasan por aquí:',
+    noLinesPassing: 'Sin líneas asignadas actualmente',
+    locationTitle: 'Ubicación en el mapa',
+    coordinatesLabel: 'Coordenadas GPS:',
+    directionsLabel: 'Sentidos de circulación asociados:',
+    stopOrderLabel: 'Parada N.°',
+    viewLineRoute: 'Ver recorrido de la línea →',
+    openSelectedStop: 'Ver detalle de este paradero →',
   },
 };

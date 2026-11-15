@@ -143,6 +143,12 @@ export default function LineDetailScreen() {
                     {stop.longitude.toFixed(4)}
                   </Text>
                 </View>
+                <Pressable
+                  style={styles.stopDetailBtn}
+                  onPress={() => router.push(`../stops/${stop.id}`)}
+                >
+                  <Text style={styles.stopDetailBtnText}>{t.lines.viewStopDetail}</Text>
+                </Pressable>
               </Pressable>
             );
           })}
@@ -264,6 +270,17 @@ const styles = StyleSheet.create({
   stopInfo: { flex: 1, gap: 2 },
   stopName: { color: colors.text, fontSize: 15, fontWeight: '600' },
   stopCoords: { color: colors.primary, fontSize: 12 },
+  stopDetailBtn: {
+    backgroundColor: colors.secondary,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  stopDetailBtnText: {
+    color: colors.text,
+    fontSize: 12,
+    fontWeight: '700',
+  },
   text: { color: colors.text, fontSize: 16 },
   button: {
     backgroundColor: colors.primary,
