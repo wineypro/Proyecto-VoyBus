@@ -14,6 +14,7 @@ const User = sequelize.define('User', {
   lockedUntil: { type: DataTypes.DATE, allowNull: true },
   alias: { type: DataTypes.STRING(15), allowNull: true, unique: true },
   photoUrl: { type: DataTypes.STRING(255), allowNull: true },
+  pendingEmail: { type: DataTypes.STRING(120), allowNull: true },
   preferences: { type: DataTypes.JSON, allowNull: true },
 });
 

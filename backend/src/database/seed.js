@@ -1,9 +1,22 @@
-const { sequelize, Role, Line, Stop, LineRoute, RouteStop } = require('../models');
+const {
+  sequelize,
+  Role,
+  Line,
+  Stop,
+  LineRoute,
+  RouteStop,
+  User,
+  FavoriteLine,
+  FavoriteStop,
+} = require('../models');
+const { hashPassword } = require('../utils/password');
 
 // El seed es idempotente: se puede ejecutar varias veces sin duplicar datos.
 async function seed() {
+  const rolesByName = {};
   for (const name of ['pasajero', 'conductor', 'administrador']) {
-    await Role.findOrCreate({ where: { name } });
+    const [role] = await Role.findOrCreate({ where: { name } });
+    rolesByName[name] = role;
   }
 
   const linesData = [
@@ -146,6 +159,31 @@ async function seed() {
       });
     }
   }
+
+  // Cuenta demo de pasajero verificada para probar ACC-05 y ACC-07
+  const demoPasswordHash = await hashPassword('VoyBus123!');
+  const [demoUser] = await User.findOrCreate({
+    where: { email: 'demo@voybus.cl' },
+    defaults: {
+      name: 'Adriano Pasajero',
+      email: 'demo@voybus.cl',
+      phone: '56912345678',
+      passwordHash: demoPasswordHash,
+      roleId: rolesByName.pasajero.id,
+      status: 'active',
+      emailVerifiedAt: new Date(),
+      privacyAcceptedAt: new Date(),
+      alias: 'adriano26',
+      photoUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200',
+    },
+  });
+
+  await FavoriteLine.findOrCreate({
+    where: { userId: demoUser.id, lineId: linesByCode.L1.id },
+  });
+  await FavoriteStop.findOrCreate({
+    where: { userId: demoUser.id, stopId: stopsByCode.P01.id },
+  });
 
   console.log('Seed completado');
 }

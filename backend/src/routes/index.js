@@ -8,6 +8,6 @@ router.get('/health', (req, res) => ok(res, { status: 'ok' }));
 router.use('/lines', require('./lines.routes'));
 router.use('/auth', require('./auth.routes'));
 router.use('/stops', require('./stops.routes'));
-// router.use('/me', require('./me.routes'));           // compañero
+router.use('/me', require('./me.routes'));
 
 module.exports = router;
