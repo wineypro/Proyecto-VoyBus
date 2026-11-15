@@ -3,9 +3,17 @@
 const sequelize = require('../config/database');
 const Role = require('./Role');
 const Line = require('./Line');
+const Stop = require('./Stop');
+const LineRoute = require('./LineRoute');
+const RouteStop = require('./RouteStop');
 
-// Ejemplo de cómo se declara una asociación (cuando existan los modelos):
-// User.belongsTo(Role, { foreignKey: 'roleId' });
-// Role.hasMany(User, { foreignKey: 'roleId' });
+Line.hasMany(LineRoute, { foreignKey: 'lineId', as: 'routes' });
+LineRoute.belongsTo(Line, { foreignKey: 'lineId', as: 'line' });
 
-module.exports = { sequelize, Role, Line };
+LineRoute.hasMany(RouteStop, { foreignKey: 'lineRouteId', as: 'routeStops' });
+RouteStop.belongsTo(LineRoute, { foreignKey: 'lineRouteId', as: 'lineRoute' });
+
+Stop.hasMany(RouteStop, { foreignKey: 'stopId', as: 'routeStops' });
+RouteStop.belongsTo(Stop, { foreignKey: 'stopId', as: 'stop' });
+
+module.exports = { sequelize, Role, Line, Stop, LineRoute, RouteStop };
