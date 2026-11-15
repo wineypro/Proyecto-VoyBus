@@ -40,6 +40,7 @@ export const es = {
     confirmPassword: 'Confirmar contraseña',
     passwordHint: '8 a 15 caracteres con mayúscula, minúscula, número y símbolo',
     acceptPrivacy: 'Acepto los términos de privacidad',
+    readPrivacy: 'Leer los términos de privacidad',
     registerButton: 'Registrarme',
     registering: 'Creando cuenta...',
     haveAccount: '¿Ya tienes cuenta? Inicia sesión',

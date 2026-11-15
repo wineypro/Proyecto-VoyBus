@@ -133,6 +133,9 @@ export default function RegisterScreen() {
           />
           <Text style={styles.privacyText}>{t.auth.acceptPrivacy}</Text>
         </View>
+        <Pressable onPress={() => router.push('/privacy')}>
+          <Text style={[styles.link, styles.privacyLink]}>{t.auth.readPrivacy}</Text>
+        </Pressable>
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -172,6 +175,7 @@ const makeStyles = (colors: Palette) =>
   hint: { marginTop: 4, fontSize: 12, color: colors.text, opacity: 0.7 },
   privacyRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 16 },
   privacyText: { flex: 1, color: colors.text },
+    privacyLink: { marginTop: 8 },
   error: { marginTop: 12, color: colors.error },
   button: { marginTop: 20, backgroundColor: colors.primary, borderRadius: 8, padding: 14, alignItems: 'center' },
   buttonDisabled: { opacity: 0.6 },
