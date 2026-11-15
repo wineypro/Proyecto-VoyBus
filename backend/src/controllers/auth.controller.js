@@ -1,6 +1,7 @@
 // Capa de controladores: traduce HTTP ↔ servicios. Sin lógica de negocio.
 const authService = require('../services/auth.service');
 const sessionService = require('../services/session.service');
+const passwordService = require('../services/password.service');
 const { ok } = require('../utils/response');
 
 async function register(req, res) {
@@ -33,4 +34,29 @@ async function logout(req, res) {
   ok(res, { loggedOut: true });
 }
 
-module.exports = { register, verifyEmail, resendCode, login, me, logout };
+async function forgotPassword(req, res) {
+  const { recovery } = await passwordService.requestReset(req.valid.body);
+  ok(res, { sent: true }, { recovery });
+}
+
+async function resetPassword(req, res) {
+  await passwordService.resetPassword(req.valid.body);
+  ok(res, { updated: true });
+}
+
+async function changePassword(req, res) {
+  await passwordService.changePassword(req.auth, req.valid.body);
+  ok(res, { updated: true });
+}
+
+module.exports = {
+  register,
+  verifyEmail,
+  resendCode,
+  login,
+  me,
+  logout,
+  forgotPassword,
+  resetPassword,
+  changePassword,
+};
