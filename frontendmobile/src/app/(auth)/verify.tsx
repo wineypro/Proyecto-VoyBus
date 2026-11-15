@@ -105,7 +105,7 @@ export default function VerifyScreen() {
 
         <Pressable style={[styles.button, submitting && styles.buttonDisabled]} onPress={onVerify} disabled={submitting}>
           {submitting ? (
-            <ActivityIndicator color={colors.white} />
+            <ActivityIndicator color={colors.onPrimary} />
           ) : (
             <Text style={styles.buttonText}>{t.auth.verifyButton}</Text>
           )}
@@ -146,7 +146,7 @@ const makeStyles = (colors: Palette) =>
   info: { marginTop: 12, color: colors.primary },
   button: { marginTop: 20, backgroundColor: colors.primary, borderRadius: 8, padding: 14, alignItems: 'center' },
   buttonDisabled: { opacity: 0.6 },
-  buttonText: { color: colors.white, fontWeight: '700' },
+  buttonText: { color: colors.onPrimary, fontWeight: '700' },
   footer: { marginTop: 20, alignItems: 'center' },
   link: { color: colors.primary, fontWeight: '600' },
   linkDisabled: { opacity: 0.5 },

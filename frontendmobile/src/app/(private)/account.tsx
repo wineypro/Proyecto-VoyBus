@@ -62,7 +62,7 @@ const makeStyles = (colors: Palette) =>
   text: { fontSize: 18, color: colors.text },
   muted: { marginTop: 4, color: colors.text, opacity: 0.7 },
   button: { marginTop: 28, backgroundColor: colors.primary, borderRadius: 8, padding: 14, alignItems: 'center' },
-  buttonText: { color: colors.white, fontWeight: '700' },
+  buttonText: { color: colors.onPrimary, fontWeight: '700' },
   secondary: {
     marginTop: 14,
     borderColor: colors.primary,

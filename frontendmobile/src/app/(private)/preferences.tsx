@@ -163,7 +163,7 @@ const makeStyles = (colors: Palette) =>
     },
     chipActive: { backgroundColor: colors.primary },
     chipText: { color: colors.primary, fontWeight: '600' },
-    chipTextActive: { color: colors.white },
+    chipTextActive: { color: colors.onPrimary },
     row: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 16 },
     rowText: { flex: 1 },
     rowLabel: { fontWeight: '600', color: colors.text },
