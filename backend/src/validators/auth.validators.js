@@ -45,4 +45,9 @@ const verifyEmailBody = z.object({
   code: z.string().trim().regex(/^[0-9]{6}$/, 'El código debe tener 6 dígitos'),
 });
 
-module.exports = { registerBody, loginBody, verifyEmailBody };
+// Reenvío del código de verificación.
+const resendCodeBody = z.object({
+  email: z.string().trim().toLowerCase().pipe(z.email('El correo no es válido')),
+});
+
+module.exports = { registerBody, loginBody, verifyEmailBody, resendCodeBody };
