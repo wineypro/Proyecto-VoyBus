@@ -7,6 +7,7 @@ const Stop = require('./Stop');
 const LineRoute = require('./LineRoute');
 const RouteStop = require('./RouteStop');
 const User = require('./User');
+const Session = require('./Session');
 
 Line.hasMany(LineRoute, { foreignKey: 'lineId', as: 'routes' });
 LineRoute.belongsTo(Line, { foreignKey: 'lineId', as: 'line' });
@@ -20,4 +21,7 @@ RouteStop.belongsTo(Stop, { foreignKey: 'stopId', as: 'stop' });
 Role.hasMany(User, { foreignKey: 'roleId', as: 'users' });
 User.belongsTo(Role, { foreignKey: 'roleId', as: 'role' });
 
-module.exports = { sequelize, Role, Line, Stop, LineRoute, RouteStop, User };
+User.hasMany(Session, { foreignKey: 'userId', as: 'sessions' });
+Session.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+module.exports = { sequelize, Role, Line, Stop, LineRoute, RouteStop, User, Session };

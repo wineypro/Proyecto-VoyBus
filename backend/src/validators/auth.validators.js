@@ -33,4 +33,16 @@ const registerBody = z
     message: 'Las contraseñas no coinciden',
   });
 
-module.exports = { registerBody };
+// Login: no se revela qué credencial falló, por eso aquí solo se exige que vengan los dos datos.
+const loginBody = z.object({
+  email: z.string().trim().toLowerCase().pipe(z.email('El correo no es válido')),
+  password: z.string().min(1, 'Ingresa tu contraseña'),
+});
+
+// Verificación del correo (simulada): código de 6 dígitos.
+const verifyEmailBody = z.object({
+  email: z.string().trim().toLowerCase().pipe(z.email('El correo no es válido')),
+  code: z.string().trim().regex(/^[0-9]{6}$/, 'El código debe tener 6 dígitos'),
+});
+
+module.exports = { registerBody, loginBody, verifyEmailBody };
