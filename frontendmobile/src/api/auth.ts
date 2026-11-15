@@ -1,4 +1,4 @@
-import { request } from './client';
+import { ApiError, request } from './client';
 
 // Usuario tal como lo entrega el backend (sin datos sensibles).
 export type User = {
@@ -39,3 +39,18 @@ export const verifyEmail = (email: string, code: string) =>
 
 export const resendCode = (email: string) =>
   request<{ sent: boolean }>('/auth/resend-code', { method: 'POST', body: { email } });
+
+// Convierte cualquier error en un texto para mostrar en pantalla. Si el backend devolvió
+// errores de validación por campo, se muestran todos los mensajes.
+export function describeError(e: unknown): string {
+  if (e instanceof ApiError) {
+    if (e.code === 'VALIDATION_ERROR' && Array.isArray(e.details)) {
+      const messages = (e.details as { message?: string }[])
+        .map((d) => d.message)
+        .filter((m): m is string => Boolean(m));
+      if (messages.length) return messages.join('\n');
+    }
+    return e.message;
+  }
+  return e instanceof Error ? e.message : 'Error inesperado';
+}

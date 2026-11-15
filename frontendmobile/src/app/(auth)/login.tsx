@@ -12,6 +12,8 @@ import {
   View,
 } from 'react-native';
 
+import { describeError } from '@/api/auth';
+import { ApiError } from '@/api/client';
 import { useAuth } from '@/auth/AuthContext';
 import { colors } from '@/constants/colors';
 import { t } from '@/i18n';
@@ -23,6 +25,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [needsVerification, setNeedsVerification] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const onSubmit = async () => {
@@ -30,12 +33,14 @@ export default function LoginScreen() {
     if (!password) return setError(t.auth.passwordRequired);
 
     setError(null);
+    setNeedsVerification(false);
     setSubmitting(true);
     try {
       await signIn(email.trim(), password);
       router.replace('/account');
     } catch (e) {
-      setError(e instanceof Error ? e.message : t.common.error);
+      setNeedsVerification(e instanceof ApiError && e.code === 'ACCOUNT_NOT_VERIFIED');
+      setError(describeError(e));
     } finally {
       setSubmitting(false);
     }
@@ -75,6 +80,13 @@ export default function LoginScreen() {
         </View>
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
+        {needsVerification ? (
+          <Pressable
+            onPress={() => router.push({ pathname: '/verify', params: { email: email.trim().toLowerCase() } })}
+          >
+            <Text style={[styles.link, styles.verifyLink]}>{t.auth.verifyAccount}</Text>
+          </Pressable>
+        ) : null}
 
         <Pressable style={[styles.button, submitting && styles.buttonDisabled]} onPress={onSubmit} disabled={submitting}>
           {submitting ? (
@@ -82,6 +94,12 @@ export default function LoginScreen() {
           ) : (
             <Text style={styles.buttonText}>{t.auth.loginButton}</Text>
           )}
+        </Pressable>
+
+        <Pressable style={styles.guest} onPress={() => router.push('/register')}>
+          <Text style={styles.link}>
+            {t.auth.noAccountYet} {t.auth.createAccount}
+          </Text>
         </Pressable>
 
         <Pressable style={styles.guest} onPress={() => router.replace('/lines')}>
@@ -119,5 +137,6 @@ const styles = StyleSheet.create({
   buttonDisabled: { opacity: 0.6 },
   buttonText: { color: colors.white, fontWeight: '700' },
   guest: { marginTop: 20, alignItems: 'center' },
+  verifyLink: { marginTop: 8 },
   link: { color: colors.primary, fontWeight: '600' },
 });
