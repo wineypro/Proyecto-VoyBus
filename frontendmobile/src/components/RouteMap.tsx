@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { LayoutChangeEvent, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { RouteStopItem } from '@/api/lines';
-import { colors } from '@/constants/colors';
 import { t } from '@/i18n';
+import { useTheme } from '@/theme/ThemeContext';
+import type { Palette } from '@/theme/ThemeContext';
 
 type Props = {
   stops: RouteStopItem[];
@@ -16,6 +17,8 @@ const MAP_HEIGHT = 230;
 const PADDING = 32;
 
 export function RouteMap({ stops, lineColor, selectedStopId, onSelectStop }: Props) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [mapWidth, setMapWidth] = useState(0);
 
   const handleLayout = (e: LayoutChangeEvent) => {
@@ -50,7 +53,6 @@ export function RouteMap({ stops, lineColor, selectedStopId, onSelectStop }: Pro
   return (
     <View style={styles.wrapper}>
       <View style={styles.mapCanvas} onLayout={handleLayout}>
-        {/* Cuadrícula de referencia cartográfica */}
         <View style={[styles.gridLineH, { top: '25%' }]} />
         <View style={[styles.gridLineH, { top: '50%' }]} />
         <View style={[styles.gridLineH, { top: '75%' }]} />
@@ -58,7 +60,6 @@ export function RouteMap({ stops, lineColor, selectedStopId, onSelectStop }: Pro
         <View style={[styles.gridLineV, { left: '50%' }]} />
         <View style={[styles.gridLineV, { left: '75%' }]} />
 
-        {/* Segmentos del recorrido entre paraderos consecutivos */}
         {mapWidth > 0 &&
           points.map((pt, idx) => {
             if (idx === points.length - 1) return null;
@@ -87,7 +88,6 @@ export function RouteMap({ stops, lineColor, selectedStopId, onSelectStop }: Pro
             );
           })}
 
-        {/* Nodos de paraderos */}
         {mapWidth > 0 &&
           points.map((pt) => {
             const isSelected = pt.id === selectedStop?.id;
@@ -131,69 +131,70 @@ export function RouteMap({ stops, lineColor, selectedStopId, onSelectStop }: Pro
   );
 }
 
-const styles = StyleSheet.create({
-  wrapper: {
-    backgroundColor: colors.white,
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: colors.secondary,
-  },
-  mapCanvas: {
-    height: MAP_HEIGHT,
-    backgroundColor: colors.background,
-    position: 'relative',
-  },
-  gridLineH: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    height: 1,
-    backgroundColor: colors.secondary,
-    opacity: 0.4,
-  },
-  gridLineV: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    width: 1,
-    backgroundColor: colors.secondary,
-    opacity: 0.4,
-  },
-  segment: {
-    position: 'absolute',
-    height: 5,
-    borderRadius: 3,
-  },
-  node: {
-    position: 'absolute',
-    borderWidth: 3,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  nodeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  nodeTextSelected: {
-    color: colors.white,
-  },
-  footerInfo: {
-    padding: 12,
-    backgroundColor: colors.white,
-    borderTopWidth: 1,
-    borderTopColor: colors.secondary,
-    gap: 2,
-  },
-  footerTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  footerCoords: {
-    fontSize: 12,
-    color: colors.primary,
-  },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    wrapper: {
+      backgroundColor: colors.white,
+      borderRadius: 12,
+      overflow: 'hidden',
+      marginBottom: 16,
+      borderWidth: 1,
+      borderColor: colors.secondary,
+    },
+    mapCanvas: {
+      height: MAP_HEIGHT,
+      backgroundColor: colors.background,
+      position: 'relative',
+    },
+    gridLineH: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      height: 1,
+      backgroundColor: colors.secondary,
+      opacity: 0.4,
+    },
+    gridLineV: {
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      width: 1,
+      backgroundColor: colors.secondary,
+      opacity: 0.4,
+    },
+    segment: {
+      position: 'absolute',
+      height: 5,
+      borderRadius: 3,
+    },
+    node: {
+      position: 'absolute',
+      borderWidth: 3,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    nodeText: {
+      fontSize: 11,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    nodeTextSelected: {
+      color: colors.onPrimary,
+    },
+    footerInfo: {
+      padding: 12,
+      backgroundColor: colors.white,
+      borderTopWidth: 1,
+      borderTopColor: colors.secondary,
+      gap: 2,
+    },
+    footerTitle: {
+      fontSize: 14,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    footerCoords: {
+      fontSize: 12,
+      color: colors.primary,
+    },
+  });

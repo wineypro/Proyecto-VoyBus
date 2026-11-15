@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { LayoutChangeEvent, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Stop } from '@/api/stops';
-import { colors } from '@/constants/colors';
 import { t } from '@/i18n';
+import { useTheme } from '@/theme/ThemeContext';
+import type { Palette } from '@/theme/ThemeContext';
 
 type Props = {
   stops: Stop[];
@@ -21,6 +22,8 @@ export function StopsMap({
   onSelectStop,
   onOpenStopDetail,
 }: Props) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [mapWidth, setMapWidth] = useState(0);
 
   const handleLayout = (e: LayoutChangeEvent) => {
@@ -116,77 +119,78 @@ export function StopsMap({
   );
 }
 
-const styles = StyleSheet.create({
-  wrapper: {
-    backgroundColor: colors.white,
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: colors.secondary,
-  },
-  mapCanvas: {
-    height: MAP_HEIGHT,
-    backgroundColor: colors.background,
-    position: 'relative',
-  },
-  gridLineH: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    height: 1,
-    backgroundColor: colors.secondary,
-    opacity: 0.4,
-  },
-  gridLineV: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    width: 1,
-    backgroundColor: colors.secondary,
-    opacity: 0.4,
-  },
-  pin: {
-    position: 'absolute',
-    paddingHorizontal: 6,
-    paddingVertical: 4,
-    borderRadius: 8,
-    borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pinText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: colors.white,
-  },
-  footerInfo: {
-    padding: 12,
-    backgroundColor: colors.white,
-    borderTopWidth: 1,
-    borderTopColor: colors.secondary,
-    gap: 8,
-  },
-  footerTextCol: { gap: 2 },
-  footerTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  footerCoords: {
-    fontSize: 12,
-    color: colors.primary,
-  },
-  detailButton: {
-    alignSelf: 'flex-start',
-    backgroundColor: colors.primary,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  detailButtonText: {
-    color: colors.white,
-    fontSize: 12,
-    fontWeight: '600',
-  },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    wrapper: {
+      backgroundColor: colors.white,
+      borderRadius: 12,
+      overflow: 'hidden',
+      marginBottom: 16,
+      borderWidth: 1,
+      borderColor: colors.secondary,
+    },
+    mapCanvas: {
+      height: MAP_HEIGHT,
+      backgroundColor: colors.background,
+      position: 'relative',
+    },
+    gridLineH: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      height: 1,
+      backgroundColor: colors.secondary,
+      opacity: 0.4,
+    },
+    gridLineV: {
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      width: 1,
+      backgroundColor: colors.secondary,
+      opacity: 0.4,
+    },
+    pin: {
+      position: 'absolute',
+      paddingHorizontal: 6,
+      paddingVertical: 4,
+      borderRadius: 8,
+      borderWidth: 2,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    pinText: {
+      fontSize: 10,
+      fontWeight: '700',
+      color: colors.onPrimary,
+    },
+    footerInfo: {
+      padding: 12,
+      backgroundColor: colors.white,
+      borderTopWidth: 1,
+      borderTopColor: colors.secondary,
+      gap: 8,
+    },
+    footerTextCol: { gap: 2 },
+    footerTitle: {
+      fontSize: 14,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    footerCoords: {
+      fontSize: 12,
+      color: colors.primary,
+    },
+    detailButton: {
+      alignSelf: 'flex-start',
+      backgroundColor: colors.primary,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 8,
+    },
+    detailButtonText: {
+      color: colors.onPrimary,
+      fontSize: 12,
+      fontWeight: '600',
+    },
+  });
