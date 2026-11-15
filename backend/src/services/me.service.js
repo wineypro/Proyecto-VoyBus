@@ -1,9 +1,10 @@
 // Capa de servicios: lógica de negocio de perfil, favoritos (ACC-05) e historial (ACC-07).
-const crypto = require('crypto');
 const { Op } = require('sequelize');
 const { User, Line, Stop, FavoriteLine, FavoriteStop } = require('../models');
 const AppError = require('../utils/AppError');
-const { toPublicUser, verificationCode } = require('./auth.service');
+const { toPublicUser } = require('./auth.service');
+const { issueCode, consumeCode, CODE_MINUTES } = require('./code.service');
+const { sendMail, codeEmail } = require('../utils/mailer');
 
 async function getFavoritesForUser(userId) {
   const [favLines, favStops] = await Promise.all([
@@ -86,10 +87,28 @@ async function updateProfile(user, roleName, payload) {
       throw new AppError(409, 'EMAIL_ALREADY_REGISTERED', 'Ya existe una cuenta con ese correo');
     }
     updates.pendingEmail = payload.email;
+    // El código se envía al correo NUEVO; el anterior sigue vigente hasta que se confirme.
+    const code = await issueCode(user, 'change_email');
+    const { text, html } = codeEmail({
+      title: 'Confirma tu nuevo correo',
+      intro: 'Usa este código para confirmar el cambio de correo de tu cuenta VoyBus.',
+      code,
+      minutes: CODE_MINUTES,
+    });
+    const result = await sendMail({
+      to: payload.email,
+      subject: 'Confirma tu nuevo correo de VoyBus',
+      text,
+      html,
+    });
     emailVerification = {
-      simulated: true,
+      channel: 'email',
+      simulated: result.simulated,
+      sent: result.sent,
       pendingEmail: payload.email,
-      code: verificationCode(payload.email),
+      expiresInMinutes: CODE_MINUTES,
+      // Solo en modo simulado (sin SMTP) se devuelve el código, para poder probar sin correo real.
+      ...(result.simulated ? { code } : {}),
     };
   }
 
@@ -104,13 +123,15 @@ async function confirmNewEmail(user, roleName, code) {
     throw new AppError(400, 'NO_PENDING_EMAIL', 'No hay un cambio de correo pendiente de verificar');
   }
 
-  const expected = Buffer.from(verificationCode(user.pendingEmail));
-  const received = Buffer.from(code);
-  const valid =
-    expected.length === received.length && crypto.timingSafeEqual(expected, received);
+  // Código de un solo uso (10 min, 5 intentos); si es incorrecto lanza INVALID_CODE.
+  await consumeCode(user, 'change_email', code);
 
-  if (!valid) {
-    throw new AppError(400, 'INVALID_CODE', 'El código de verificación no es válido');
+  // Por si otra cuenta tomó ese correo mientras tanto.
+  const taken = await User.findOne({
+    where: { email: user.pendingEmail, id: { [Op.ne]: user.id } },
+  });
+  if (taken) {
+    throw new AppError(409, 'EMAIL_ALREADY_REGISTERED', 'Ya existe una cuenta con ese correo');
   }
 
   await user.update({
