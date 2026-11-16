@@ -39,8 +39,13 @@ export default function LoginScreen() {
     setNeedsVerification(false);
     setSubmitting(true);
     try {
-      await signIn(email.trim(), password);
-      router.replace('/account');
+      const result = await signIn(email.trim(), password);
+      if (result.status === 'two-factor') {
+        // La contraseña es correcta, pero falta el código de la app autenticadora.
+        router.push({ pathname: '/two-factor', params: { challenge: result.challengeToken } });
+      } else {
+        router.replace('/account');
+      }
     } catch (e) {
       setNeedsVerification(e instanceof ApiError && e.code === 'ACCOUNT_NOT_VERIFIED');
       setError(describeError(e));
@@ -95,11 +100,11 @@ export default function LoginScreen() {
           <Text style={styles.link}>{t.auth.forgotPassword}</Text>
         </Pressable>
 
-        <Pressable style={[styles.button, submitting && styles.buttonDisabled]} onPress={onSubmit} disabled={submitting}>
+        <Pressable style={[styles.button, styles.buttonAccent, submitting && styles.buttonDisabled]} onPress={onSubmit} disabled={submitting}>
           {submitting ? (
-            <ActivityIndicator color={colors.onPrimary} />
+            <ActivityIndicator color={colors.onAccent} />
           ) : (
-            <Text style={styles.buttonText}>{t.auth.loginButton}</Text>
+            <Text style={styles.buttonAccentText}>{t.auth.loginButton}</Text>
           )}
         </Pressable>
 
@@ -144,6 +149,8 @@ const makeStyles = (colors: Palette) =>
   },
   buttonDisabled: { opacity: 0.6 },
   buttonText: { color: colors.onPrimary, fontWeight: '700' },
+  buttonAccent: { backgroundColor: colors.accent },
+  buttonAccentText: { color: colors.onAccent, fontWeight: '700' },
   guest: { marginTop: 20, alignItems: 'center' },
   verifyLink: { marginTop: 8 },
   forgot: { marginTop: 12, alignItems: 'flex-end' },

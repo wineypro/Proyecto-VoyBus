@@ -12,6 +12,8 @@ import {
 } from 'react-native';
 
 import { describeError, resendCode, verifyEmail } from '@/api/auth';
+import { useAuth } from '@/auth/AuthContext';
+import { takeRegistrationDraft } from '@/auth/registrationDraft';
 import { useTheme } from '@/theme/ThemeContext';
 import type { Palette } from '@/theme/ThemeContext';
 import { t } from '@/i18n';
@@ -23,6 +25,7 @@ export default function VerifyScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const router = useRouter();
+  const { signIn } = useAuth();
   const { email: emailParam } = useLocalSearchParams<{ email?: string }>();
   const email = (emailParam ?? '').toString();
 
@@ -48,6 +51,19 @@ export default function VerifyScreen() {
     setSubmitting(true);
     try {
       await verifyEmail(email, code.trim());
+      // Si la persona viene del registro, se abre su sesión y se le ofrece activar el 2FA (ACC-01).
+      const password = takeRegistrationDraft(email);
+      if (password) {
+        try {
+          const result = await signIn(email, password);
+          if (result.status === 'ok') {
+            router.replace({ pathname: '/security', params: { welcome: '1' } });
+            return;
+          }
+        } catch {
+          // Si no se pudo abrir la sesión, se muestra la pantalla normal de cuenta verificada.
+        }
+      }
       setVerified(true);
     } catch (e) {
       setError(describeError(e));

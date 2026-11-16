@@ -10,10 +10,16 @@ export type User = {
   status: string;
   alias: string | null;
   photoUrl: string | null;
+  twoFactorEnabled?: boolean;
   createdAt: string;
 };
 
 export type LoginResult = { token: string; expiresAt: string; user: User };
+
+// Si la cuenta tiene verificación en dos pasos, el login no entrega sesión: entrega un desafío.
+export type LoginResponse = LoginResult | { requiresTwoFactor: true; challengeToken: string };
+
+export type TwoFactorSetup = { secret: string; otpauthUrl: string; qrDataUrl: string };
 
 export type RegisterInput = {
   name: string;
@@ -25,7 +31,18 @@ export type RegisterInput = {
 };
 
 export const login = (email: string, password: string) =>
-  request<LoginResult>('/auth/login', { method: 'POST', body: { email, password } });
+  request<LoginResponse>('/auth/login', { method: 'POST', body: { email, password } });
+
+export const loginTwoFactor = (challengeToken: string, code: string) =>
+  request<LoginResult>('/auth/login/2fa', { method: 'POST', body: { challengeToken, code } });
+
+export const setupTwoFactor = () => request<TwoFactorSetup>('/auth/2fa/setup', { method: 'POST' });
+
+export const enableTwoFactor = (code: string) =>
+  request<{ enabled: boolean }>('/auth/2fa/enable', { method: 'POST', body: { code } });
+
+export const disableTwoFactor = (password: string, code: string) =>
+  request<{ enabled: boolean }>('/auth/2fa/disable', { method: 'POST', body: { password, code } });
 
 export const getMe = () => request<User>('/auth/me');
 

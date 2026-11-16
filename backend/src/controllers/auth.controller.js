@@ -20,8 +20,12 @@ async function resendCode(req, res) {
 }
 
 async function login(req, res) {
-  const { token, expiresAt, user } = await authService.login(req.valid.body);
-  ok(res, { token, user }, { expiresAt });
+  const result = await authService.login(req.valid.body);
+  // Cuenta con verificación en dos pasos: todavía no hay sesión, falta el código de la app.
+  if (result.requiresTwoFactor) {
+    return ok(res, { requiresTwoFactor: true, challengeToken: result.challengeToken });
+  }
+  ok(res, { token: result.token, user: result.user }, { expiresAt: result.expiresAt });
 }
 
 // Usuario de la sesión actual (lo carga requireAuth).

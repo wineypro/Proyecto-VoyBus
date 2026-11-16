@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 
 import { describeError, register } from '@/api/auth';
+import { setRegistrationDraft } from '@/auth/registrationDraft';
 import { useTheme } from '@/theme/ThemeContext';
 import type { Palette } from '@/theme/ThemeContext';
 import { t } from '@/i18n';
@@ -62,6 +63,7 @@ export default function RegisterScreen() {
         confirmPassword,
         acceptPrivacy: true,
       });
+      setRegistrationDraft(email.trim().toLowerCase(), password);
       router.replace({ pathname: '/verify', params: { email: email.trim().toLowerCase() } });
     } catch (e) {
       setError(describeError(e));
@@ -133,14 +135,17 @@ export default function RegisterScreen() {
           />
           <Text style={styles.privacyText}>{t.auth.acceptPrivacy}</Text>
         </View>
+        <Pressable onPress={() => router.push('/privacy')}>
+          <Text style={[styles.link, styles.privacyLink]}>{t.auth.readPrivacy}</Text>
+        </Pressable>
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
-        <Pressable style={[styles.button, submitting && styles.buttonDisabled]} onPress={onSubmit} disabled={submitting}>
+        <Pressable style={[styles.button, styles.buttonAccent, submitting && styles.buttonDisabled]} onPress={onSubmit} disabled={submitting}>
           {submitting ? (
-            <ActivityIndicator color={colors.onPrimary} />
+            <ActivityIndicator color={colors.onAccent} />
           ) : (
-            <Text style={styles.buttonText}>{t.auth.registerButton}</Text>
+            <Text style={styles.buttonAccentText}>{t.auth.registerButton}</Text>
           )}
         </Pressable>
 
@@ -172,10 +177,13 @@ const makeStyles = (colors: Palette) =>
   hint: { marginTop: 4, fontSize: 12, color: colors.text, opacity: 0.7 },
   privacyRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 16 },
   privacyText: { flex: 1, color: colors.text },
+    privacyLink: { marginTop: 8 },
   error: { marginTop: 12, color: colors.error },
   button: { marginTop: 20, backgroundColor: colors.primary, borderRadius: 8, padding: 14, alignItems: 'center' },
   buttonDisabled: { opacity: 0.6 },
   buttonText: { color: colors.onPrimary, fontWeight: '700' },
+  buttonAccent: { backgroundColor: colors.accent },
+  buttonAccentText: { color: colors.onAccent, fontWeight: '700' },
   footer: { marginTop: 20, alignItems: 'center' },
   link: { color: colors.primary, fontWeight: '600' },
 });

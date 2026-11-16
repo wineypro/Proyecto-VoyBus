@@ -7,11 +7,16 @@ import { ApiError, setSessionToken } from '@/api/client';
 
 import { clearToken, loadToken, saveToken } from './tokenStorage';
 
+// Resultado del login: o ya hay sesión, o falta el código de la app autenticadora.
+export type SignInResult = { status: 'ok' } | { status: 'two-factor'; challengeToken: string };
+
 type AuthState = {
   user: User | null;
   // true mientras se revisa si quedó una sesión guardada en el teléfono
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<SignInResult>;
+  completeTwoFactor: (challengeToken: string, code: string) => Promise<void>;
+  refreshUser: () => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -47,11 +52,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })();
   }, []);
 
-  const signIn = useCallback(async (email: string, password: string) => {
-    const result = await authApi.login(email, password);
+  // Deja la sesión abierta: token en memoria, token guardado y usuario cargado.
+  const finishLogin = useCallback(async (result: authApi.LoginResult) => {
     setSessionToken(result.token);
     await saveToken(result.token);
     setUser(result.user);
+  }, []);
+
+  const signIn = useCallback(
+    async (email: string, password: string): Promise<SignInResult> => {
+      const result = await authApi.login(email, password);
+      if ('requiresTwoFactor' in result) {
+        return { status: 'two-factor', challengeToken: result.challengeToken };
+      }
+      await finishLogin(result);
+      return { status: 'ok' };
+    },
+    [finishLogin],
+  );
+
+  const completeTwoFactor = useCallback(
+    async (challengeToken: string, code: string) => {
+      await finishLogin(await authApi.loginTwoFactor(challengeToken, code));
+    },
+    [finishLogin],
+  );
+
+  // Vuelve a pedir los datos de la cuenta (por ejemplo, tras activar o desactivar el 2FA).
+  const refreshUser = useCallback(async () => {
+    setUser(await authApi.getMe());
   }, []);
 
   const signOut = useCallback(async () => {
@@ -65,7 +94,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
-  const value = useMemo(() => ({ user, loading, signIn, signOut }), [user, loading, signIn, signOut]);
+  const value = useMemo(
+    () => ({ user, loading, signIn, completeTwoFactor, refreshUser, signOut }),
+    [user, loading, signIn, completeTwoFactor, refreshUser, signOut],
+  );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
