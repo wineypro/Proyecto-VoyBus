@@ -1,18 +1,36 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+import { AuthProvider, useAuth } from '@/auth/AuthContext';
+import { PreferencesProvider } from '@/preferences/PreferencesContext';
+import { ThemeProvider, useTheme } from '@/theme/ThemeContext';
 
-SplashScreen.preventAutoHideAsync();
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+// Las pantallas privadas (grupo "(private)") solo existen mientras hay sesión.
+// Al cerrar sesión desaparecen del historial, así el botón "atrás" no las reabre.
+function Routes() {
+  const { user } = useAuth();
+  const { isDark } = useTheme();
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    <>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Protected guard={!!user}>
+          <Stack.Screen name="(private)" />
+        </Stack.Protected>
+      </Stack>
+    </>
+  );
+}
+
+// Layout raíz: sesión → preferencias de la cuenta → tema.
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <PreferencesProvider>
+        <ThemeProvider>
+          <Routes />
+        </ThemeProvider>
+      </PreferencesProvider>
+    </AuthProvider>
   );
 }

@@ -1,0 +1,232 @@
+const {
+  sequelize,
+  Role,
+  Line,
+  Stop,
+  LineRoute,
+  RouteStop,
+  User,
+  FavoriteLine,
+  FavoriteStop,
+  HistoryRecord,
+} = require('../models');
+const { hashPassword } = require('../utils/password');
+
+// El seed es idempotente: se puede ejecutar varias veces sin duplicar datos.
+async function seed() {
+  const rolesByName = {};
+  for (const name of ['pasajero', 'conductor', 'administrador']) {
+    const [role] = await Role.findOrCreate({ where: { name } });
+    rolesByName[name] = role;
+  }
+
+  const linesData = [
+    {
+      code: 'L1',
+      name: 'Línea 1 · Centro - Costanera',
+      color: '#1B7F5C',
+      status: 'active',
+      origin: 'Plaza Colón',
+      destination: 'Mall Costanera',
+      isActive: true,
+    },
+    {
+      code: 'L2',
+      name: 'Línea 2 · Terminal - Universidad',
+      color: '#F2994A',
+      status: 'active',
+      origin: 'Terminal Norte',
+      destination: 'Campus UCN',
+      isActive: true,
+    },
+    {
+      code: 'L3',
+      name: 'Línea 3 · Hospital - Plaza',
+      color: '#2D9CDB',
+      status: 'suspended',
+      origin: 'Hospital Regional',
+      destination: 'Plaza Sotomayor',
+      isActive: true,
+    },
+  ];
+
+  const linesByCode = {};
+  for (const item of linesData) {
+    const [line] = await Line.findOrCreate({ where: { code: item.code }, defaults: item });
+    await line.update(item);
+    linesByCode[item.code] = line;
+  }
+
+  // Catálogo inicial con 10 paraderos (validación de RED-02: al menos 10 paraderos).
+  const stopsData = [
+    { code: 'P01', name: 'Plaza Colón', latitude: -23.6464, longitude: -70.398 },
+    { code: 'P02', name: 'Mercado Central', latitude: -23.6485, longitude: -70.3965 },
+    { code: 'P03', name: 'Avenida Brasil', latitude: -23.6542, longitude: -70.4001 },
+    { code: 'P04', name: 'Balneario Municipal', latitude: -23.665, longitude: -70.4045 },
+    { code: 'P05', name: 'Mall Costanera', latitude: -23.6735, longitude: -70.4045 },
+    { code: 'P06', name: 'Terminal Norte', latitude: -23.619, longitude: -70.3885 },
+    { code: 'P07', name: 'Hospital Regional', latitude: -23.6355, longitude: -70.392 },
+    { code: 'P08', name: 'Estadio Regional', latitude: -23.6695, longitude: -70.402 },
+    { code: 'P09', name: 'Campus UCN', latitude: -23.6805, longitude: -70.4095 },
+    { code: 'P10', name: 'Plaza Sotomayor', latitude: -23.6498, longitude: -70.395 },
+  ];
+
+  const stopsByCode = {};
+  for (const item of stopsData) {
+    const [stop] = await Stop.findOrCreate({ where: { code: item.code }, defaults: item });
+    await stop.update(item);
+    stopsByCode[item.code] = stop;
+  }
+
+  // Recorridos por sentido (Ida y Regreso) para cada línea
+  const routesData = [
+    {
+      lineCode: 'L1',
+      direction: 'Ida · Centro → Costanera',
+      operatingDays: 'Lunes a Domingo',
+      schedule: '06:00 - 22:30',
+      origin: 'Plaza Colón',
+      destination: 'Mall Costanera',
+      stops: ['P01', 'P02', 'P03', 'P04', 'P05'],
+    },
+    {
+      lineCode: 'L1',
+      direction: 'Regreso · Costanera → Centro',
+      operatingDays: 'Lunes a Domingo',
+      schedule: '06:30 - 23:00',
+      origin: 'Mall Costanera',
+      destination: 'Plaza Colón',
+      stops: ['P05', 'P04', 'P03', 'P02', 'P01'],
+    },
+    {
+      lineCode: 'L2',
+      direction: 'Ida · Terminal → Universidad',
+      operatingDays: 'Lunes a Sábado',
+      schedule: '06:15 - 22:00',
+      origin: 'Terminal Norte',
+      destination: 'Campus UCN',
+      stops: ['P06', 'P07', 'P01', 'P08', 'P09'],
+    },
+    {
+      lineCode: 'L2',
+      direction: 'Regreso · Universidad → Terminal',
+      operatingDays: 'Lunes a Sábado',
+      schedule: '06:45 - 22:30',
+      origin: 'Campus UCN',
+      destination: 'Terminal Norte',
+      stops: ['P09', 'P08', 'P01', 'P07', 'P06'],
+    },
+    {
+      lineCode: 'L3',
+      direction: 'Ida · Hospital → Plaza',
+      operatingDays: 'Lunes a Viernes',
+      schedule: '07:00 - 21:00',
+      origin: 'Hospital Regional',
+      destination: 'Plaza Sotomayor',
+      stops: ['P07', 'P01', 'P02', 'P10'],
+    },
+    {
+      lineCode: 'L3',
+      direction: 'Regreso · Plaza → Hospital',
+      operatingDays: 'Lunes a Viernes',
+      schedule: '07:30 - 21:30',
+      origin: 'Plaza Sotomayor',
+      destination: 'Hospital Regional',
+      stops: ['P10', 'P02', 'P01', 'P07'],
+    },
+  ];
+
+  for (const r of routesData) {
+    const line = linesByCode[r.lineCode];
+    const [lineRoute] = await LineRoute.findOrCreate({
+      where: { lineId: line.id, direction: r.direction },
+      defaults: {
+        lineId: line.id,
+        direction: r.direction,
+        operatingDays: r.operatingDays,
+        schedule: r.schedule,
+        origin: r.origin,
+        destination: r.destination,
+      },
+    });
+
+    await RouteStop.destroy({ where: { lineRouteId: lineRoute.id } });
+    for (let i = 0; i < r.stops.length; i++) {
+      const stop = stopsByCode[r.stops[i]];
+      await RouteStop.create({
+        lineRouteId: lineRoute.id,
+        stopId: stop.id,
+        sequence: i + 1,
+      });
+    }
+  }
+
+  // Cuenta demo de pasajero verificada para probar ACC-05 y ACC-07
+  const demoPasswordHash = await hashPassword('VoyBus123!');
+  const [demoUser] = await User.findOrCreate({
+    where: { email: 'demo@voybus.cl' },
+    defaults: {
+      name: 'Adriano Pasajero',
+      email: 'demo@voybus.cl',
+      phone: '56912345678',
+      passwordHash: demoPasswordHash,
+      roleId: rolesByName.pasajero.id,
+      status: 'active',
+      emailVerifiedAt: new Date(),
+      privacyAcceptedAt: new Date(),
+      alias: 'adriano26',
+      photoUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200',
+    },
+  });
+
+  await FavoriteLine.findOrCreate({
+    where: { userId: demoUser.id, lineId: linesByCode.L1.id },
+  });
+  await FavoriteStop.findOrCreate({
+    where: { userId: demoUser.id, stopId: stopsByCode.P01.id },
+  });
+
+  // Historial de demostración (ACC-07) para la cuenta demo, con fechas relativas a hoy.
+  // Se borra y se vuelve a crear para que el seed siga siendo idempotente.
+  // Las horas se escriben en hora de Chile (UTC-3 en verano).
+  const daysAgo = (days, hour, minute) => {
+    const d = new Date();
+    d.setUTCDate(d.getUTCDate() - days);
+    d.setUTCHours(hour + 3, minute, 0, 0);
+    return d;
+  };
+  const historyData = [
+    { days: 1, h: 18, m: 40, line: 'L1', dir: 'Regreso · Costanera → Centro', stop: 'P02', status: 'notified', reason: 'El conductor recibió el aviso antes de llegar al paradero' },
+    { days: 1, h: 8, m: 15, line: 'L1', dir: 'Ida · Centro → Costanera', stop: 'P03', status: 'notified', reason: 'El conductor recibió el aviso antes de llegar al paradero' },
+    { days: 2, h: 7, m: 50, line: 'L2', dir: 'Ida · Terminal → Universidad', stop: 'P08', status: 'cancelled', reason: 'El pasajero canceló la solicitud antes de llegar' },
+    { days: 3, h: 13, m: 5, line: 'L2', dir: 'Regreso · Universidad → Terminal', stop: 'P01', status: 'expired', reason: 'El viaje terminó sin que el conductor atendiera la solicitud' },
+    { days: 5, h: 9, m: 30, line: 'L3', dir: 'Ida · Hospital → Plaza', stop: 'P10', status: 'notified', reason: 'El conductor recibió el aviso antes de llegar al paradero' },
+    { days: 6, h: 19, m: 20, line: 'L1', dir: 'Ida · Centro → Costanera', stop: 'P04', status: 'notified', reason: 'El conductor recibió el aviso antes de llegar al paradero' },
+  ];
+  await HistoryRecord.destroy({ where: { userId: demoUser.id } });
+  for (const h of historyData) {
+    const line = linesByCode[h.line];
+    const stop = stopsByCode[h.stop];
+    await HistoryRecord.create({
+      userId: demoUser.id,
+      lineId: line.id,
+      stopId: stop.id,
+      lineCode: line.code,
+      lineName: line.name,
+      routeDirection: h.dir,
+      stopName: stop.name,
+      status: h.status,
+      closeReason: h.reason,
+      occurredAt: daysAgo(h.days, h.h, h.m),
+    });
+  }
+
+  console.log('Seed completado');
+}
+
+seed()
+  .then(() => sequelize.close())
+  .catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
