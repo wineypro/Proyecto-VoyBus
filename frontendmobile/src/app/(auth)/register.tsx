@@ -141,11 +141,11 @@ export default function RegisterScreen() {
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
-        <Pressable style={[styles.button, submitting && styles.buttonDisabled]} onPress={onSubmit} disabled={submitting}>
+        <Pressable style={[styles.button, styles.buttonAccent, submitting && styles.buttonDisabled]} onPress={onSubmit} disabled={submitting}>
           {submitting ? (
-            <ActivityIndicator color={colors.onPrimary} />
+            <ActivityIndicator color={colors.onAccent} />
           ) : (
-            <Text style={styles.buttonText}>{t.auth.registerButton}</Text>
+            <Text style={styles.buttonAccentText}>{t.auth.registerButton}</Text>
           )}
         </Pressable>
 
@@ -182,6 +182,8 @@ const makeStyles = (colors: Palette) =>
   button: { marginTop: 20, backgroundColor: colors.primary, borderRadius: 8, padding: 14, alignItems: 'center' },
   buttonDisabled: { opacity: 0.6 },
   buttonText: { color: colors.onPrimary, fontWeight: '700' },
+  buttonAccent: { backgroundColor: colors.accent },
+  buttonAccentText: { color: colors.onAccent, fontWeight: '700' },
   footer: { marginTop: 20, alignItems: 'center' },
   link: { color: colors.primary, fontWeight: '600' },
 });

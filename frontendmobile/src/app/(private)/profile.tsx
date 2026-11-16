@@ -307,11 +307,11 @@ export default function ProfileScreen() {
 
         <View style={styles.actionsRow}>
           <Pressable
-            style={[styles.button, submitting && styles.buttonDisabled]}
+            style={[styles.button, styles.buttonAccent, submitting && styles.buttonDisabled]}
             onPress={() => handleSave(null)}
             disabled={submitting}
           >
-            <Text style={styles.buttonText}>{t.common.save}</Text>
+            <Text style={styles.buttonAccentText}>{t.common.save}</Text>
           </Pressable>
           {hasUnsavedChanges && (
             <Pressable style={styles.secondaryButton} onPress={handleDiscardChanges}>
@@ -497,6 +497,8 @@ const makeStyles = (colors: Palette) =>
     },
     buttonDisabled: { opacity: 0.6 },
     buttonText: { color: colors.onPrimary, fontWeight: '700', fontSize: 14 },
+    buttonAccent: { backgroundColor: colors.accent },
+    buttonAccentText: { color: colors.onAccent, fontWeight: '700', fontSize: 14 },
     secondaryButton: {
       backgroundColor: colors.secondary,
       paddingHorizontal: 14,

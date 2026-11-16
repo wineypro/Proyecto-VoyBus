@@ -100,11 +100,11 @@ export default function LoginScreen() {
           <Text style={styles.link}>{t.auth.forgotPassword}</Text>
         </Pressable>
 
-        <Pressable style={[styles.button, submitting && styles.buttonDisabled]} onPress={onSubmit} disabled={submitting}>
+        <Pressable style={[styles.button, styles.buttonAccent, submitting && styles.buttonDisabled]} onPress={onSubmit} disabled={submitting}>
           {submitting ? (
-            <ActivityIndicator color={colors.onPrimary} />
+            <ActivityIndicator color={colors.onAccent} />
           ) : (
-            <Text style={styles.buttonText}>{t.auth.loginButton}</Text>
+            <Text style={styles.buttonAccentText}>{t.auth.loginButton}</Text>
           )}
         </Pressable>
 
@@ -149,6 +149,8 @@ const makeStyles = (colors: Palette) =>
   },
   buttonDisabled: { opacity: 0.6 },
   buttonText: { color: colors.onPrimary, fontWeight: '700' },
+  buttonAccent: { backgroundColor: colors.accent },
+  buttonAccentText: { color: colors.onAccent, fontWeight: '700' },
   guest: { marginTop: 20, alignItems: 'center' },
   verifyLink: { marginTop: 8 },
   forgot: { marginTop: 12, alignItems: 'flex-end' },

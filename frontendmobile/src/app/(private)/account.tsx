@@ -40,18 +40,6 @@ export default function AccountScreen() {
         </Text>
         <Text style={styles.muted}>{user?.email}</Text>
 
-        <Pressable style={styles.button} onPress={() => router.push('/lines')}>
-          <Text style={styles.buttonText}>{t.auth.goToLines}</Text>
-        </Pressable>
-
-        <Pressable style={styles.secondary} onPress={() => router.push('/profile')}>
-          <Text style={styles.secondaryText}>{t.auth.profileButton}</Text>
-        </Pressable>
-
-        <Pressable style={styles.secondary} onPress={() => router.push('/history')}>
-          <Text style={styles.secondaryText}>{t.auth.historyButton}</Text>
-        </Pressable>
-
         <Pressable style={styles.secondary} onPress={() => router.push('/preferences')}>
           <Text style={styles.secondaryText}>{t.auth.preferencesButton}</Text>
         </Pressable>
@@ -78,7 +66,7 @@ const makeStyles = (colors: Palette) =>
     content: { flex: 1, justifyContent: 'center' },
     title: { fontSize: 26, fontWeight: '700', color: colors.text, marginBottom: 12 },
     text: { fontSize: 18, color: colors.text },
-    muted: { marginTop: 4, color: colors.text, opacity: 0.7 },
+    muted: { marginTop: 4, marginBottom: 12, color: colors.text, opacity: 0.7 },
     button: {
       marginTop: 24,
       backgroundColor: colors.primary,

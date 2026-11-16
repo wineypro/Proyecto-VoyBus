@@ -105,11 +105,11 @@ export default function SecurityScreen() {
 
         {/* Desactivada y sin iniciar la activación */}
         {!enabled && !setup ? (
-          <Pressable style={[styles.button, busy && styles.buttonDisabled]} onPress={onStart} disabled={busy}>
+          <Pressable style={[styles.button, styles.buttonAccent, busy && styles.buttonDisabled]} onPress={onStart} disabled={busy}>
             {busy ? (
-              <ActivityIndicator color={colors.onPrimary} />
+              <ActivityIndicator color={colors.onAccent} />
             ) : (
-              <Text style={styles.buttonText}>{t.twofa.enableButton}</Text>
+              <Text style={styles.buttonAccentText}>{t.twofa.enableButton}</Text>
             )}
           </Pressable>
         ) : null}
@@ -142,11 +142,11 @@ export default function SecurityScreen() {
               maxLength={6}
             />
 
-            <Pressable style={[styles.button, busy && styles.buttonDisabled]} onPress={onConfirm} disabled={busy}>
+            <Pressable style={[styles.button, styles.buttonAccent, busy && styles.buttonDisabled]} onPress={onConfirm} disabled={busy}>
               {busy ? (
-                <ActivityIndicator color={colors.onPrimary} />
+                <ActivityIndicator color={colors.onAccent} />
               ) : (
-                <Text style={styles.buttonText}>{t.twofa.confirmButton}</Text>
+                <Text style={styles.buttonAccentText}>{t.twofa.confirmButton}</Text>
               )}
             </Pressable>
             <Pressable
@@ -257,6 +257,8 @@ const makeStyles = (colors: Palette) =>
     button: { marginTop: 20, backgroundColor: colors.primary, borderRadius: 8, padding: 14, alignItems: 'center' },
     buttonDisabled: { opacity: 0.6 },
     buttonText: { color: colors.onPrimary, fontWeight: '700' },
+    buttonAccent: { backgroundColor: colors.accent },
+    buttonAccentText: { color: colors.onAccent, fontWeight: '700' },
     danger: {
       marginTop: 20,
       borderColor: colors.error,
