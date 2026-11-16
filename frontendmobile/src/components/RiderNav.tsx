@@ -92,8 +92,10 @@ export function RiderNav({ active, onNavigateAttempt }: Props) {
   );
 }
 
-const makeStyles = (colors: Palette) =>
-  StyleSheet.create({
+const makeStyles = (colors: Palette) => {
+  // En el tema oscuro la franja es un verde profundo y el botón activo usa el verde primario.
+  const dark = colors.header !== colors.primary;
+  return StyleSheet.create({
     // Franja verde recta de borde a borde. Las pantallas usan padding 20 y paddingTop 50,
     // por eso los márgenes negativos: así la franja llega a los bordes y al tope.
     navBar: {
@@ -106,7 +108,7 @@ const makeStyles = (colors: Palette) =>
       paddingTop: 50,
       paddingHorizontal: 20,
       paddingBottom: 16,
-      backgroundColor: colors.primary,
+      backgroundColor: colors.header,
     },
     navTab: {
       flexGrow: 1,
@@ -120,8 +122,8 @@ const makeStyles = (colors: Palette) =>
       alignItems: 'center',
     },
     navTabActive: {
-      backgroundColor: '#FFFFFF',
-      borderColor: '#FFFFFF',
+      backgroundColor: dark ? colors.primary : '#FFFFFF',
+      borderColor: dark ? colors.primary : '#FFFFFF',
     },
     navTabText: {
       fontSize: 13,
@@ -129,6 +131,7 @@ const makeStyles = (colors: Palette) =>
       color: colors.onPrimary,
     },
     navTabTextActive: {
-      color: colors.primary,
+      color: dark ? colors.onPrimary : colors.primary,
     },
   });
+};

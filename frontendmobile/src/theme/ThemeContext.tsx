@@ -7,9 +7,11 @@ import { usePreferences } from '@/preferences/PreferencesContext';
 
 // "onPrimary" es el color del texto sobre botones y chips de color primario.
 // "onAccent" es el color del texto sobre el acento (naranja), oscuro para que se lea bien.
-export type Palette = typeof lightColors & { onPrimary: string; onAccent: string };
+// "header" es el color de la franja superior con la navegación: en el tema claro es el primario;
+// en el oscuro es un verde profundo (#194131, medido de la maqueta del cliente), no el primario brillante.
+export type Palette = typeof lightColors & { onPrimary: string; onAccent: string; header: string };
 
-const light: Palette = { ...lightColors, onPrimary: '#FFFFFF', onAccent: '#12352A' };
+const light: Palette = { ...lightColors, onPrimary: '#FFFFFF', onAccent: '#12352A', header: lightColors.primary };
 
 // Paleta oscura de "Verde urbano" definida con el cliente: primario #28A778, secundario #243E35
 // y acento #F5A65B. El fondo, el texto y la superficie se tomaron de la maqueta (aproximados).
@@ -24,6 +26,7 @@ export const darkColors: Palette = {
   error: '#FF6B5E',
   onPrimary: '#FFFFFF',
   onAccent: '#101B17',
+  header: '#194131',
 };
 
 type ThemeState = { colors: Palette; isDark: boolean };
