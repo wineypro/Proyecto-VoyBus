@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 
 import type { Preferences, PreferencesPatch } from '@/api/preferences';
 import { usePreferences } from '@/preferences/PreferencesContext';
@@ -49,6 +49,12 @@ export default function PreferencesScreen() {
     } catch {
       setError(t.prefs.saveError);
     }
+  };
+
+  // Si hay algún aviso activado, se explica qué permiso necesita el teléfono y se ofrece abrir sus ajustes.
+  const anyNotificationOn = Object.values(prefs.notifications).some(Boolean);
+  const openPhoneSettings = () => {
+    Linking.openSettings().catch(() => setError(t.prefs.openSettingsError));
   };
 
   const themes: { value: Preferences['theme']; label: string }[] = [
@@ -115,7 +121,17 @@ export default function PreferencesScreen() {
         value={prefs.notifications.tips}
         onChange={(v) => change({ notifications: { tips: v } })}
       />
-      <Text style={styles.note}>{t.prefs.notificationsDeviceNote}</Text>
+      {anyNotificationOn ? (
+        <View style={styles.permCard}>
+          <Text style={styles.permTitle}>{t.prefs.notifPermissionTitle}</Text>
+          <Text style={styles.permText}>{t.prefs.notifPermissionText}</Text>
+          <Pressable style={styles.permButton} onPress={openPhoneSettings}>
+            <Text style={styles.permButtonText}>{t.prefs.openSettings}</Text>
+          </Pressable>
+        </View>
+      ) : (
+        <Text style={styles.note}>{t.prefs.notificationsDeviceNote}</Text>
+      )}
 
       <Text style={styles.section}>{t.prefs.privacyTitle}</Text>
       <Text style={styles.hint}>{t.prefs.privacyHint}</Text>
@@ -167,6 +183,26 @@ const makeStyles = (colors: Palette) =>
     row: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 16 },
     rowText: { flex: 1 },
     rowLabel: { fontWeight: '600', color: colors.text },
+    permCard: {
+      marginTop: 10,
+      padding: 14,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: colors.accent,
+      backgroundColor: colors.white,
+      gap: 6,
+    },
+    permTitle: { fontSize: 14, fontWeight: '700', color: colors.text },
+    permText: { fontSize: 13, color: colors.text, opacity: 0.85 },
+    permButton: {
+      alignSelf: 'flex-start',
+      marginTop: 4,
+      backgroundColor: colors.accent,
+      borderRadius: 8,
+      paddingHorizontal: 14,
+      paddingVertical: 9,
+    },
+    permButtonText: { color: colors.onAccent, fontWeight: '700', fontSize: 13 },
     back: { marginTop: 32, alignItems: 'center' },
     backText: { color: colors.primary, fontWeight: '600' },
   });

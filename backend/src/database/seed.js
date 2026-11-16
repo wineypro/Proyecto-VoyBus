@@ -8,6 +8,7 @@ const {
   User,
   FavoriteLine,
   FavoriteStop,
+  HistoryRecord,
 } = require('../models');
 const { hashPassword } = require('../utils/password');
 
@@ -184,6 +185,41 @@ async function seed() {
   await FavoriteStop.findOrCreate({
     where: { userId: demoUser.id, stopId: stopsByCode.P01.id },
   });
+
+  // Historial de demostración (ACC-07) para la cuenta demo, con fechas relativas a hoy.
+  // Se borra y se vuelve a crear para que el seed siga siendo idempotente.
+  // Las horas se escriben en hora de Chile (UTC-3 en verano).
+  const daysAgo = (days, hour, minute) => {
+    const d = new Date();
+    d.setUTCDate(d.getUTCDate() - days);
+    d.setUTCHours(hour + 3, minute, 0, 0);
+    return d;
+  };
+  const historyData = [
+    { days: 1, h: 18, m: 40, line: 'L1', dir: 'Regreso · Costanera → Centro', stop: 'P02', status: 'notified', reason: 'El conductor recibió el aviso antes de llegar al paradero' },
+    { days: 1, h: 8, m: 15, line: 'L1', dir: 'Ida · Centro → Costanera', stop: 'P03', status: 'notified', reason: 'El conductor recibió el aviso antes de llegar al paradero' },
+    { days: 2, h: 7, m: 50, line: 'L2', dir: 'Ida · Terminal → Universidad', stop: 'P08', status: 'cancelled', reason: 'El pasajero canceló la solicitud antes de llegar' },
+    { days: 3, h: 13, m: 5, line: 'L2', dir: 'Regreso · Universidad → Terminal', stop: 'P01', status: 'expired', reason: 'El viaje terminó sin que el conductor atendiera la solicitud' },
+    { days: 5, h: 9, m: 30, line: 'L3', dir: 'Ida · Hospital → Plaza', stop: 'P10', status: 'notified', reason: 'El conductor recibió el aviso antes de llegar al paradero' },
+    { days: 6, h: 19, m: 20, line: 'L1', dir: 'Ida · Centro → Costanera', stop: 'P04', status: 'notified', reason: 'El conductor recibió el aviso antes de llegar al paradero' },
+  ];
+  await HistoryRecord.destroy({ where: { userId: demoUser.id } });
+  for (const h of historyData) {
+    const line = linesByCode[h.line];
+    const stop = stopsByCode[h.stop];
+    await HistoryRecord.create({
+      userId: demoUser.id,
+      lineId: line.id,
+      stopId: stop.id,
+      lineCode: line.code,
+      lineName: line.name,
+      routeDirection: h.dir,
+      stopName: stop.name,
+      status: h.status,
+      closeReason: h.reason,
+      occurredAt: daysAgo(h.days, h.h, h.m),
+    });
+  }
 
   console.log('Seed completado');
 }

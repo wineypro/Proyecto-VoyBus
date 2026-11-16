@@ -2,6 +2,7 @@
 const { Op } = require('sequelize');
 const { User, Line, Stop, FavoriteLine, FavoriteStop } = require('../models');
 const AppError = require('../utils/AppError');
+const historyService = require('./history.service');
 const { toPublicUser } = require('./auth.service');
 const { issueCode, consumeCode, CODE_MINUTES } = require('./code.service');
 const { sendMail, codeEmail } = require('../utils/mailer');
@@ -171,16 +172,9 @@ async function removeFavoriteStop(userId, stopId) {
   return getFavoritesForUser(userId);
 }
 
-// ACC-07: Historial personal. Según la sección 7 de la guía, se entrega con estado vacío
-// porque aún no hay viajes, soportando los filtros por fecha y línea.
+// ACC-07: Historial personal. La lógica vive en history.service.js.
 async function getHistory(userId, filters = {}) {
-  return {
-    items: [],
-    filters: {
-      date: filters.date ?? null,
-      lineId: filters.lineId ? Number(filters.lineId) : null,
-    },
-  };
+  return historyService.listHistory(userId, filters);
 }
 
 module.exports = {

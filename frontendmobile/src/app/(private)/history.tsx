@@ -27,6 +27,7 @@ export default function HistoryScreen() {
   const [error, setError] = useState<string | null>(null);
 
   const [dateFilter, setDateFilter] = useState('');
+  const [dateError, setDateError] = useState<string | null>(null);
   const [selectedLineId, setSelectedLineId] = useState<string>('');
   const [selectedRecord, setSelectedRecord] = useState<TripHistoryItem | null>(null);
 
@@ -45,6 +46,21 @@ export default function HistoryScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Valida la fecha en el teléfono antes de pedirla: así un error de tipeo no reemplaza la pantalla.
+  const applyFilters = () => {
+    const value = dateFilter.trim();
+    const valid =
+      value === '' ||
+      (/^\d{4}-\d{2}-\d{2}$/.test(value) &&
+        new Date(`${value}T00:00:00Z`).toISOString().startsWith(value));
+    if (!valid) {
+      setDateError(t.history.invalidDate);
+      return;
+    }
+    setDateError(null);
+    loadData(value, selectedLineId);
   };
 
   useEffect(() => {
@@ -98,17 +114,15 @@ export default function HistoryScreen() {
             placeholder={t.history.filterDatePlaceholder}
             placeholderTextColor={colors.primary}
           />
-          <Pressable
-            style={styles.smallButton}
-            onPress={() => loadData(dateFilter, selectedLineId)}
-          >
-            <Text style={styles.buttonText}>{t.common.retry}</Text>
+          <Pressable style={styles.smallButton} onPress={applyFilters}>
+            <Text style={styles.buttonText}>{t.history.applyFilters}</Text>
           </Pressable>
           {(dateFilter || selectedLineId) ? (
             <Pressable
               style={styles.clearButton}
               onPress={() => {
                 setDateFilter('');
+                setDateError(null);
                 setSelectedLineId('');
                 loadData('', '');
               }}
@@ -117,6 +131,8 @@ export default function HistoryScreen() {
             </Pressable>
           ) : null}
         </View>
+
+        {dateError ? <Text style={styles.dateError}>{dateError}</Text> : null}
 
         <Text style={styles.filterLabel}>{t.history.filterLineLabel}</Text>
         <View style={styles.linePillsRow}>
@@ -209,6 +225,7 @@ const makeStyles = (colors: Palette) =>
       backgroundColor: colors.background,
     },
     title: { fontSize: 24, fontWeight: '700', color: colors.primary, marginBottom: 4 },
+    dateError: { color: colors.error, fontSize: 12, marginTop: 4, marginBottom: 4 },
     subtitle: { fontSize: 13, color: colors.text, marginBottom: 10 },
     disclaimerBox: {
       backgroundColor: colors.secondary,

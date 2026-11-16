@@ -10,6 +10,7 @@ const User = require('./User');
 const Session = require('./Session');
 const FavoriteLine = require('./FavoriteLine');
 const FavoriteStop = require('./FavoriteStop');
+const HistoryRecord = require('./HistoryRecord');
 const OneTimeCode = require('./OneTimeCode');
 
 Line.hasMany(LineRoute, { foreignKey: 'lineId', as: 'routes' });
@@ -35,6 +36,11 @@ User.hasMany(FavoriteStop, { foreignKey: 'userId', as: 'favoriteStops' });
 FavoriteStop.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 FavoriteStop.belongsTo(Stop, { foreignKey: 'stopId', as: 'stop' });
 
+User.hasMany(HistoryRecord, { foreignKey: 'userId', as: 'historyRecords' });
+HistoryRecord.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+HistoryRecord.belongsTo(Line, { foreignKey: 'lineId', as: 'line' });
+HistoryRecord.belongsTo(Stop, { foreignKey: 'stopId', as: 'stop' });
+
 User.hasMany(OneTimeCode, { foreignKey: 'userId', as: 'codes' });
 OneTimeCode.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
@@ -49,5 +55,6 @@ module.exports = {
   Session,
   FavoriteLine,
   FavoriteStop,
+  HistoryRecord,
   OneTimeCode,
 };
