@@ -130,6 +130,11 @@ export const es = {
     notifTipsHint: 'Ideas ocasionales para sacar más provecho a VoyBus.',
     notificationsDeviceNote:
       'Si no recibes avisos, revisa que VoyBus tenga permiso de notificaciones en los Ajustes de tu teléfono (Ajustes > Aplicaciones > VoyBus > Notificaciones).',
+    notifPermissionTitle: 'Para recibir avisos, tu teléfono debe permitirlos',
+    notifPermissionText:
+      'Si no te llegan, abre los Ajustes de tu teléfono y activa las notificaciones de VoyBus (Ajustes > Aplicaciones > VoyBus > Notificaciones).',
+    openSettings: 'Abrir ajustes del teléfono',
+    openSettingsError: 'No se pudieron abrir los ajustes. Ábrelos manualmente desde tu teléfono.',
     privacyTitle: 'Privacidad',
     privacyHint: 'Por defecto no se comparte nada. Tú decides.',
     privShowRecent: 'Mostrar mi actividad reciente',
