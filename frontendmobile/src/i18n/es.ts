@@ -261,6 +261,8 @@ export const es = {
     filterLineLabel: 'Filtrar por línea',
     allLinesOption: 'Todas las líneas',
     clearFilters: 'Limpiar',
+    applyFilters: 'Filtrar',
+    invalidDate: 'Escribe la fecha como AAAA-MM-DD, por ejemplo 2026-11-15.',
     emptyTitle: 'Aún no registras viajes ni solicitudes de parada',
     emptyText:
       'Cuando te vincules a un vehículo mediante código QR y solicites una parada, tus registros aparecerán aquí.',
