@@ -62,7 +62,7 @@ async function seed() {
     { code: 'P02', name: 'Mercado Central', latitude: -23.6485, longitude: -70.3965 },
     { code: 'P03', name: 'Avenida Brasil', latitude: -23.6542, longitude: -70.4001 },
     { code: 'P04', name: 'Balneario Municipal', latitude: -23.665, longitude: -70.4045 },
-    { code: 'P05', name: 'Mall Costanera', latitude: -23.6412, longitude: -70.3995 },
+    { code: 'P05', name: 'Mall Costanera', latitude: -23.6735, longitude: -70.4045 },
     { code: 'P06', name: 'Terminal Norte', latitude: -23.619, longitude: -70.3885 },
     { code: 'P07', name: 'Hospital Regional', latitude: -23.6355, longitude: -70.392 },
     { code: 'P08', name: 'Estadio Regional', latitude: -23.6695, longitude: -70.402 },
@@ -122,7 +122,7 @@ async function seed() {
       schedule: '07:00 - 21:00',
       origin: 'Hospital Regional',
       destination: 'Plaza Sotomayor',
-      stops: ['P07', 'P05', 'P02', 'P10'],
+      stops: ['P07', 'P01', 'P02', 'P10'],
     },
     {
       lineCode: 'L3',
@@ -131,7 +131,7 @@ async function seed() {
       schedule: '07:30 - 21:30',
       origin: 'Plaza Sotomayor',
       destination: 'Hospital Regional',
-      stops: ['P10', 'P02', 'P05', 'P07'],
+      stops: ['P10', 'P02', 'P01', 'P07'],
     },
   ];
 
