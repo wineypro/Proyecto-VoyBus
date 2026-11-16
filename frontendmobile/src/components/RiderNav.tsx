@@ -1,4 +1,5 @@
 import { useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -30,6 +31,8 @@ export function RiderNav({ active, onNavigateAttempt }: Props) {
 
   return (
     <View style={styles.navBar}>
+      {/* Íconos claros de la barra de estado sobre la franja verde */}
+      <StatusBar style="light" />
       <Pressable
         style={[styles.navTab, active === 'lines' && styles.navTabActive]}
         onPress={() => navigateTo('lines', '/lines')}
@@ -91,11 +94,19 @@ export function RiderNav({ active, onNavigateAttempt }: Props) {
 
 const makeStyles = (colors: Palette) =>
   StyleSheet.create({
+    // Franja verde recta de borde a borde. Las pantallas usan padding 20 y paddingTop 50,
+    // por eso los márgenes negativos: así la franja llega a los bordes y al tope.
     navBar: {
       flexDirection: 'row',
       flexWrap: 'wrap',
       gap: 8,
-      marginBottom: 16,
+      marginHorizontal: -20,
+      marginTop: -50,
+      marginBottom: 18,
+      paddingTop: 50,
+      paddingHorizontal: 20,
+      paddingBottom: 16,
+      backgroundColor: colors.primary,
     },
     navTab: {
       flexGrow: 1,
@@ -103,21 +114,21 @@ const makeStyles = (colors: Palette) =>
       paddingVertical: 10,
       paddingHorizontal: 8,
       borderRadius: 10,
-      backgroundColor: colors.white,
+      backgroundColor: 'rgba(255,255,255,0.18)',
       borderWidth: 1,
-      borderColor: colors.secondary,
+      borderColor: 'rgba(255,255,255,0.35)',
       alignItems: 'center',
     },
     navTabActive: {
-      backgroundColor: colors.primary,
-      borderColor: colors.primary,
+      backgroundColor: '#FFFFFF',
+      borderColor: '#FFFFFF',
     },
     navTabText: {
       fontSize: 13,
       fontWeight: '700',
-      color: colors.text,
+      color: colors.onPrimary,
     },
     navTabTextActive: {
-      color: colors.onPrimary,
+      color: colors.primary,
     },
   });
